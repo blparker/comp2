@@ -30,7 +30,7 @@ class Parser {
   private function expr() {
     /* TreeNode */ $t = $this->simple_exp();
     if($this->is_relop()) {
-      $p = new ExpNode(ExpKing::opK);
+      $p = new ExpNode(ExpKind::opK);
       $p->add_child($t);
       $p->value = $this->token_value();
       $t = $p;
@@ -111,8 +111,13 @@ class Parser {
     return $t;
   }
 
-  private function match() {
-    ++$this->idx;
+  private function match(/* TokenType */ $tokenType) {
+    if($this->token_type() == $tokenType) {
+      ++$this->idx;
+    }
+    else {
+      throw new Exception('Expected to match: "'. $tokenType .'"');
+    }
   }
 
   private function token_type() {
