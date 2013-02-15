@@ -2,6 +2,7 @@
 
 /*
 
+stmt-seq    -> expr { newline expr }
 expr        -> simple-exp [ relop simple-exp ]
 relop       -> '<=' | '<' | '>' | '>=' | '==' | '!='
 simple-exp  -> term { addop term }
@@ -21,8 +22,35 @@ class Parser {
   }
 
   public function parse() {
-    $t = $this->expr();
-    //print_r($t);
+    $t = $this->stmt_seq();
+
+    if(!$this->at_end()) {
+      $this->error();
+    }
+
+    return $t;
+  }
+
+  // expr { newline expr }
+  private function stmt_seq() {
+    /* TreeNode */ $t = $this->expr();
+    /* TreeNode */ $p = $t;
+
+    while($this->token_type() != TokenType::EOF) {
+      $this->match(TokenType::NL);
+      /* TreeNode */ $q = $this->expr();
+
+      if($q != null) {
+        if($t == null) {
+          $t = $p = $q;
+        }
+        else {
+          $p->sibling = $q;
+          $p = $q;
+        }
+      }
+    }
+
     return $t;
   }
 
@@ -116,7 +144,7 @@ class Parser {
       ++$this->idx;
     }
     else {
-      throw new Exception('Expected to match: "'. $tokenType .'"');
+      throw new Exception("Match failed. Expected: '$tokenType'; Actual: '{$this->token_type()}'");
     }
   }
 
@@ -130,8 +158,12 @@ class Parser {
     return $this->tokens[$this->idx]->value;
   }
 
+  public function at_end() {
+    return $this->token_type() == TokenType::EOF;
+  }
+
   private function error() {
-    throw new Error('Unexpected token: "'. $this->tokens[$i] .'"');
+    throw new Exception('Unexpected token: "'. $this->tokens[$this->idx]->value .'"');
   }
   
 }
@@ -140,6 +172,7 @@ class Parser {
 
 class TreeNode {
   public $children = array();
+  public $sibling;
   public function add_child(TreeNode $child) {
     array_push($this->children, $child);
   }
@@ -184,6 +217,8 @@ class TokenType {
   const LP  = '(';
   const RP  = ')';
   const NUM = 'number';
+  const EOF = 'eof';
+  const NL = 'nl';
 }
 
 class Token {
@@ -195,33 +230,3 @@ class Token {
   }
 }
 
-
-// 2 + 3
-/*$tokens = array(
-  new Token(TokenType::NUM, '2'), 
-  new Token(TokenType::ADD, '+'), 
-  new Token(TokenType::NUM, '3')
-);*/
-
-// 2 + 3 * 4
-/*$tokens = array(
-  new Token(TokenType::NUM, '2'), 
-  new Token(TokenType::ADD, '+'), 
-  new Token(TokenType::NUM, '3'),
-  new Token(TokenType::MUL, '*'), 
-  new Token(TokenType::NUM, '4')
-);*/
-
-// (2 + 3) * 4
-/*$tokens = array(
-  new Token(TokenType::LP, '('), 
-  new Token(TokenType::NUM, '2'), 
-  new Token(TokenType::ADD, '+'), 
-  new Token(TokenType::NUM, '3'),
-  new Token(TokenType::RP, ')'),
-  new Token(TokenType::MUL, '*'), 
-  new Token(TokenType::NUM, '4')
-);*/
-
-//$parser = new Parser($tokens);
-//$parser->parse();

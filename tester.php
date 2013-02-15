@@ -22,5 +22,9 @@ function assertForEach($arr, $fn) {
   }
 }
 
-
+function assertNotNull($obj) {
+ if($obj == null) {
+    throw new Exception("Expected not null, got null");
+  } 
+}
 
