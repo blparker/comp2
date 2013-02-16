@@ -2,15 +2,19 @@
 
 class TreePrinter {
   private $indent = -2;
+  private $indentAmt;
 
-  public function print_tree(TreeNode $tree) {
+  public function print_tree(TreeNode $tree, $indentAmt = 2) {
+    $this->indentAmt = $indentAmt;
+    $this->indent = (0 - ($this->indentAmt));
+
     echo "\n\n";
     $this->_print_tree($tree);   
     echo "\n\n\n";
   }
 
   private function _print_tree($tree) {
-    $this->indent += 2;
+    $this->indent += $this->indentAmt;
 
     while($tree != null) {
       $this->print_spaces();
@@ -52,7 +56,7 @@ class TreePrinter {
       $tree = $tree->sibling;
     }
     
-    $this->indent -= 2;
+    $this->indent -= $this->indentAmt;
   }
 
   private function print_spaces() {

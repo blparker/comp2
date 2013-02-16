@@ -2,7 +2,7 @@
 
 require('expr_parser.php');
 require('tree_printer.php');
-require('tester.php');
+require('test/assert.php');
 
 /******************************************
 *   Test factor number: NUM
@@ -277,6 +277,8 @@ try {
   throw new Exception('*** SHOULDNT SEE ME ***');
 }
 catch(Exception $ex) {
+  echo "GOT EX: \n";
+  print_r($ex);
   assertNotNull($ex);
 }
 
