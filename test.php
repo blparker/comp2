@@ -1,6 +1,7 @@
 <?php
 
 require('expr_parser.php');
+require('tree_printer.php');
 require('tester.php');
 
 /******************************************
@@ -12,7 +13,7 @@ $t = $parser->parse();
 
 assertEquals(1, count($t));
 assertEquals(2, $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 
 
 /******************************************
@@ -29,7 +30,7 @@ $t = $parser->parse();
 
 assertEquals(1, count($t));
 assertEquals(2, $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 
 
 /******************************************
@@ -48,9 +49,9 @@ $t = $parser->parse();
 assertEquals(1, count($t));
 assertEquals(2, count($t->children));
 assertEquals('+', $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 assertForEach($t->children, function($child) {
-  return $child instanceof ExpNode;
+  return $child instanceof ExprNode;
 });
 
 
@@ -71,9 +72,9 @@ $t = $parser->parse();
 assertEquals(1, count($t));
 assertEquals(2, count($t->children));
 assertEquals('+', $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 assertForEach($t->children, function($child) {
-  return $child instanceof ExpNode;
+  return $child instanceof ExprNode;
 });
 
 
@@ -92,9 +93,9 @@ $t = $parser->parse();
 assertEquals(1, count($t));
 assertEquals(2, count($t->children));
 assertEquals('*', $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 assertForEach($t->children, function($child) {
-  return $child instanceof ExpNode;
+  return $child instanceof ExprNode;
 });
 assertEquals(1, $t->children[0]->value);
 assertEquals(3, $t->children[1]->value);
@@ -115,9 +116,9 @@ $t = $parser->parse();
 assertEquals(1, count($t));
 assertEquals(2, count($t->children));
 assertEquals('<', $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 assertForEach($t->children, function($child) {
-  return $child instanceof ExpNode;
+  return $child instanceof ExprNode;
 });
 assertEquals(1, $t->children[0]->value);
 assertEquals(3, $t->children[1]->value);
@@ -138,9 +139,9 @@ $t = $parser->parse();
 assertEquals(1, count($t));
 assertEquals(2, count($t->children));
 assertEquals('<=', $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 assertForEach($t->children, function($child) {
-  return $child instanceof ExpNode;
+  return $child instanceof ExprNode;
 });
 assertEquals(1, $t->children[0]->value);
 assertEquals(2, $t->children[1]->value);
@@ -164,9 +165,9 @@ assertEquals(1, count($t));
 assertEquals(2, count($t->children));
 assertEquals(1, $t->children[0]->value);
 assertEquals('+', $t->value);
-assertTrue($t instanceof ExpNode);
+assertTrue($t instanceof ExprNode);
 assertForEach($t->children, function($child) {
-  return $child instanceof ExpNode;
+  return $child instanceof ExprNode;
 });
 assertEquals('*', $t->children[1]->value);
 assertEquals(2, $t->children[1]->children[0]->value);
@@ -295,5 +296,76 @@ $tokens = array(
 );
 $parser = new Parser($tokens);
 $t = $parser->parse();
+
+
+/******************************************
+*   Test assign stmt: foo = 2
+******************************************/
+$tokens = array(
+  new Token(TokenType::ID, 'foo'),
+  new Token(TokenType::EQ, '='),
+  new Token(TokenType::NUM, '2'),
+  new Token(TokenType::EOF, '')
+);
+$parser = new Parser($tokens);
+$t = $parser->parse();
+
+/*$tp = new TreePrinter();
+$tp->print_tree($t);*/
+
+
+/*
+   = (foo)
+   |
+   2
+*/
+assertTrue($t instanceof StmtNode);
+assertTrue($t->kind == StmtKind::assignK);
+assertEquals(1, count($t->children));
+assertEquals('foo', $t->value);
+assertEquals('2', $t->children[0]->value);
+
+
+/******************************************
+*   Test id in expression: foo = 2\n1 + foo
+******************************************/
+$tokens = array(
+  new Token(TokenType::ID, 'foo'),
+  new Token(TokenType::EQ, '='),
+  new Token(TokenType::NUM, '2'),
+  new Token(TokenType::NL, 'nl'),
+  new Token(TokenType::NUM, '1'),
+  new Token(TokenType::ADD, '+'),
+  new Token(TokenType::ID, 'foo'),
+  new Token(TokenType::EOF, '')
+);
+$parser = new Parser($tokens);
+$t = $parser->parse();
+
 //print_r($t);
+
+
+/******************************************
+*   Test multiline: foo = 2\nfoo + 1\n2 + foo
+******************************************/
+$tokens = array(
+  new Token(TokenType::ID, 'foo'),
+  new Token(TokenType::EQ, '='),
+  new Token(TokenType::NUM, '2'),
+  new Token(TokenType::NL, 'nl'),
+  new Token(TokenType::ID, 'foo'),
+  new Token(TokenType::ADD, '+'),
+  new Token(TokenType::NUM, '1'),
+  new Token(TokenType::NL, 'nl'),
+  new Token(TokenType::NUM, '2'),
+  new Token(TokenType::ADD, '+'),
+  new Token(TokenType::ID, 'foo'),
+  new Token(TokenType::EOF, '')
+);
+$parser = new Parser($tokens);
+$t = $parser->parse();
+
+//print_r($t);
+$tp = new TreePrinter();
+$tp->print_tree($t);
 

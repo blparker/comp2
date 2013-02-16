@@ -1,15 +1,19 @@
 <?php
 
+require_once('tree_node.php');
+
 /*
 
-stmt-seq    -> expr { newline expr }
+stmt-seq    -> stmt { newline stmt }
+stmt        -> assign-stmt | expr
+assign-stmt -> identifier '=' exp
 expr        -> simple-exp [ relop simple-exp ]
 relop       -> '<=' | '<' | '>' | '>=' | '==' | '!='
 simple-exp  -> term { addop term }
 addop       -> '+' | '-'
 term        -> factor { mulop factor }
 mulop       -> '*' | '/'
-factor      -> '(' expr ')' | NUMBER
+factor      -> '(' expr ')' | NUMBER | identifier
 
 */
 
@@ -31,14 +35,14 @@ class Parser {
     return $t;
   }
 
-  // expr { newline expr }
+  // stmt { newline stmt }
   private function stmt_seq() {
-    /* TreeNode */ $t = $this->expr();
+    /* TreeNode */ $t = $this->stmt();
     /* TreeNode */ $p = $t;
 
     while($this->token_type() != TokenType::EOF) {
       $this->match(TokenType::NL);
-      /* TreeNode */ $q = $this->expr();
+      /* TreeNode */ $q = $this->stmt();
 
       if($q != null) {
         if($t == null) {
@@ -54,11 +58,59 @@ class Parser {
     return $t;
   }
 
+  // assign-stmt | expr
+  private function stmt() {
+    /* TreeNode */ $t = null;
+
+    $tokenType = $this->token_type();
+
+    if($tokenType == TokenType::ID && $this->look_ahead(1)->type == TokenType::EQ) {
+      $t = $this->assign_stmt();
+    }
+    else {
+      $t = $this->expr();
+
+      if($t == null) {
+        $this->error();
+      }
+    }
+
+    /*switch($this->token_type()) {
+      case TokenType::ID:
+        $t = $this->assign_stmt();
+        break;
+      default:
+        $t = $this->expr();
+
+        if($t == null) {
+          $this->error();
+        }
+        break;
+    }*/
+
+    return $t;
+  }
+
+  // identifier exp
+  private function assign_stmt() {
+    /* TreeNode */ $t = new StmtNode(StmtKind::assignK);
+
+    if($this->token_type() == TokenType::ID) {
+      $t->value($this->token_value());
+    }
+
+    $this->match(TokenType::ID);
+    $this->match(TokenType::EQ);
+    $t->add_child($this->expr());
+
+    return $t;
+  }
+
   // simple-exp [ relop simple-exp ]
   private function expr() {
     /* TreeNode */ $t = $this->simple_exp();
     if($this->is_relop()) {
-      $p = new ExpNode(ExpKind::opK);
+      $p = new ExprNode(ExpKind::opK);
       $p->add_child($t);
       $p->value = $this->token_value();
       $t = $p;
@@ -89,7 +141,7 @@ class Parser {
   private function simple_exp() {
     /* TreeNode */ $t = $this->term();
     while($this->token_type() == TokenType::ADD || $this->token_type() == TokenType::SUB) {
-      $p = new ExpNode(ExpKind::opK);
+      $p = new ExprNode(ExpKind::opK);
       $p->add_child($t);
       $p->value = $this->token_value();
       $t = $p;
@@ -105,7 +157,7 @@ class Parser {
     $t = $this->factor();
 
     while($this->token_type() == TokenType::MUL || $this->token_type() == TokenType::DIV) {
-      /* TreeNode */ $p = new ExpNode(ExpKind::opK);
+      /* TreeNode */ $p = new ExprNode(ExpKind::opK);
       $p->add_child($t);
       $p->value = $this->token_value();
       $t = $p;
@@ -116,13 +168,13 @@ class Parser {
     return $t;
   }
 
-  // '(' expr ')' | NUMBER
+  // '(' expr ')' | NUMBER | identifier
   private function factor() {
     /* TreeNode */ $t = null;
 
     switch($this->token_type()) {
       case TokenType::NUM:
-        $t = new ExpNode(ExpKind::constK);
+        $t = new ExprNode(ExpKind::constK);
         $t->value(intval($this->token_value()));
         $this->match(TokenType::NUM);
         break;
@@ -130,6 +182,11 @@ class Parser {
         $this->match(TokenType::LP);
         $t = $this->expr();
         $this->match(TokenType::RP);
+        break;
+      case TokenType::ID:
+        $t = new ExprNode(ExpKind::idK);
+        $t->value = $this->token_value();
+        $this->match(TokenType::ID);
         break;
       default:
         $this->error();
@@ -162,46 +219,19 @@ class Parser {
     return $this->token_type() == TokenType::EOF;
   }
 
+  public function look_ahead($howMany) {
+    if(($howMany + $this->idx) < count($this->tokens)) {
+      return $this->tokens[$this->idx + $howMany];
+    }
+
+    return null;
+  }
+
   private function error() {
     throw new Exception('Unexpected token: "'. $this->tokens[$this->idx]->value .'"');
   }
   
 }
-
-
-
-class TreeNode {
-  public $children = array();
-  public $sibling;
-  public function add_child(TreeNode $child) {
-    array_push($this->children, $child);
-  }
-}
-
-class ExpNode extends TreeNode {
-  public /* TreeNode */ $sibling;
-  public /* ExpKind */ $kind;
-  public $value;
-
-  public function __construct(/*ExpKind*/ $kind) {
-    $this->kind = $kind;
-  }
-
-  public function value($value = null) {
-    if($value != null) {
-      $this->value = $value;
-    }
-    else {
-      return $this->value;
-    }
-  }
-}
-
-class ExpKind {
-  const constK = 'constK';
-  const opK  = 'opK';
-}
-
 
 class TokenType {
   const LTE = '<=';
@@ -219,6 +249,8 @@ class TokenType {
   const NUM = 'number';
   const EOF = 'eof';
   const NL = 'nl';
+  const ID = 'id';
+  const EQ = '=';
 }
 
 class Token {
