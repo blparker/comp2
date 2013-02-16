@@ -4,6 +4,7 @@ require_once('tree_node.php');
 
 /*
 
+program     -> stmt-seq
 stmt-seq    -> stmt { newline stmt }
 stmt        -> assign-stmt | expr
 assign-stmt -> identifier '=' exp
@@ -26,12 +27,18 @@ class Parser {
   }
 
   public function parse() {
-    $t = $this->stmt_seq();
+    /* TreeNode */ $t = $this->program();
 
     if(!$this->at_end()) {
       $this->error();
     }
 
+    return $t;
+  }
+
+  // stmt-seq
+  private function program() {
+    /* TreeNode */ $t = $this->stmt_seq();
     return $t;
   }
 
@@ -74,19 +81,6 @@ class Parser {
         $this->error();
       }
     }
-
-    /*switch($this->token_type()) {
-      case TokenType::ID:
-        $t = $this->assign_stmt();
-        break;
-      default:
-        $t = $this->expr();
-
-        if($t == null) {
-          $this->error();
-        }
-        break;
-    }*/
 
     return $t;
   }

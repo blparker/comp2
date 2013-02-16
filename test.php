@@ -277,8 +277,6 @@ try {
   throw new Exception('*** SHOULDNT SEE ME ***');
 }
 catch(Exception $ex) {
-  echo "GOT EX: \n";
-  print_r($ex);
   assertNotNull($ex);
 }
 
@@ -368,6 +366,17 @@ $parser = new Parser($tokens);
 $t = $parser->parse();
 
 //print_r($t);
-$tp = new TreePrinter();
-$tp->print_tree($t);
+//$tp = new TreePrinter();
+//$tp->print_tree($t);
 
+/*
+  num = 2
+
+  if in_range 2 then println num + ' is in range'
+  else println 'Not in range'
+  
+  in_range = (num)
+    max = 10
+    return (num > 0 && num > (max - 1))
+
+*/
