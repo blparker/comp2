@@ -1,6 +1,6 @@
 <?php
 
-require('expr_parser.php');
+require('parser.php');
 require('tree_printer.php');
 require('test/assert.php');
 
