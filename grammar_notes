@@ -1,0 +1,62 @@
+
+program     -> stmt-seq
+stmt-seq    -> stmt { newline stmt }
+stmt        -> assign-stmt | expr
+assign-stmt -> identifier '=' exp
+expr        -> simple-exp [ relop simple-exp ]
+relop       -> '<=' | '<' | '>' | '>=' | '==' | '!='
+simple-exp  -> term { addop term }
+addop       -> '+' | '-'
+term        -> factor { mulop factor }
+mulop       -> '*' | '/'
+factor      -> '(' expr ')' | NUMBER | identifier
+
+
+stmt        -> if-stmt
+            |  for-stmt
+            |  while-stmt
+            |  do-while-stmt
+            |  assign-stmt
+            |  function-stmt
+            |  oop-stmt
+            |  try-stmt
+
+if-stmt       -> 'if' expr block { 'else if' block } [ 'else' block ]
+               | 'if' expr 'then' simple-stmt [ 'else' simple-stmt ]
+for-stmt      -> 'for'
+while-stmt    -> 'while' expr block
+do-while-stmt -> 'do' block 'while' expr
+assign-stmt   -> identifier '=' expr
+function-stmt -> identifier '=' '(' params-list ')' block
+oop-stmt      -> class-stmt | interface-stmt
+class-stmt    -> class-modifier 'class' identifier class-implements class-body
+interface-stmt-> 'interface' identifier [ 'extends' identifier { ',' identifier } ] interface-body
+try-stmt      -> 'try' block 'catch' identifier block { 'catch' identifier block }
+class-modifier-> 'abstract' | 'final' | empty
+
+params-list   -> param | empty
+param         -> identifier | identifier '=' default-param
+default-param -> 'null' | literal | array-decl
+array-decl    -> '[' array-el {, array-el } ']'
+array-el      -> array-decl | expr | literal | empty
+class-implements -> 'extends' identifier 'implements' identifier { ',' identifier }
+                  | 'extends' identifier
+                  | 'implements' identifier { ',' identifier }
+                  | empty
+
+class-body    -> NEWLINE INDENT { class-element } NEWLINE DEDENT
+class-element -> class-function | class-property
+class-function-> [ function-modifier ] identifier '=' '(' params-list ')' block
+class-property-> access-modifier access-level identifier { '=' default-param }
+               | access-level identifier '=' default-param
+               | const-decl
+access-modifier -> 'public' | 'private' | 'protected' | empty
+access-level  -> 'static' | empty
+const-decl    -> 'const' identifier '=' default-param
+
+interface-body-> 
+
+
+
+
+
