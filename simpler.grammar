@@ -1,0 +1,37 @@
+
+program     = block
+
+block       = statement { NEWLINE statement }
+
+statement   = if_stmt
+            | assign_stmt
+            | function_call
+            | arith_stmt
+
+assign_stmt = 'var' IDENTIFIER [ '=' expr ]
+            | IDENTIFIER '=' expr
+
+if_stmt     = 'if' expr NEWLINE block { 'else if' expr NEWLINE block } [ 'else' NEWLINE block ]
+
+arith_stmt    = simple_arith [ relop simple_arith ]
+simple_arith  = arith_term { addop arith_term }
+relop         = '<=' | '<' | '>' | '>=' | '==' | '!='
+addop         = '+' | '-'
+arith_term    = arith_factor { mulop arith_factor }
+mulop         = '*' | '/'
+arith_factor  = '(' arith_stmt ')' | NUMBER | IDENTIFIER
+
+expr        = null
+            | simple_type
+//            | compound_type
+//            | function
+            | function_call
+
+simple_type = true | false | NUMBER | STRING | IDENTIFIER
+compound_type = array_decl
+
+function_call = IDENTIFIER '(' [ expr_list ] ')'
+              | IDENTIFIER expr_list
+
+expr_list     = { expr ',' } expr
+

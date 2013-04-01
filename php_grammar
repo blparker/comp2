@@ -1,0 +1,66 @@
+
+expr        = r_variable | expr_without_variable ;
+
+r_variable  = variable ;
+
+variable    = base_variable_with_function_calls [ "->" object_property method_parameters { "->" object_property method_parameters } ] ;
+
+base_variable_with_function_calls = base_variable | function_call ;
+
+base_variable = reference_variable
+  | simple_indirect_reference reference_variable
+  | static_member ;
+
+simple_indirect_reference = "$" {"$"} ;
+
+reference_variable = compound_variable { selector } ;
+
+selector = "[" [expr] "]" | "{" expr "}" ;
+
+compound_variable = T_VARIABLE | "$" "{" expr "}" ;
+
+static_member = fully_qualified_class_name "::" variable_without_objects ;
+
+variable_without_objects = reference_variable | simple_indirect_reference reference_variable ;
+
+fully_qualified_class_name = T_STRING ;
+
+function_call = T_STRING "(" function_call_parameter_list ")"
+  | fully_qualified_class_name "::" T_STRING "(" function_call_parameter_list ")"
+  | fully_qualified_class_name "::" variable_without_objects "(" function_call_parameter_list ")"
+  | variable_without_objects "(" function_call_parameter_list ")" ;
+
+expr_without_variable = "list" "(" assignment_list ")" "=" expr
+  | variable "=" expr
+  | variable "=" "&" variable
+  | variable "=" "&" "new" class_name_reference [ctor_arguments]
+  | "new" class_name_reference [ctor_arguments]
+  | "clone" expr
+  | variable ("+=" | "-=" | "*=" | "/=" | ".=" | "%=" | "&=" | "|=" | "^=" | "<<=" | ">>=" ) expr
+  | rw_variable "++"
+  | "++" rw_variable
+  | rw_variable "--"
+  | "--" rw_variable
+  | expr ("||" | "&&" | "or" | "and" | "xor" | "|" | "&" | "^" | "." | "+" | "-" | "*" | "/" | "%" | "<<" | ">>" | "===" | "!==" | "<" | "<=" | ">" | ">=" ) expr
+  | ("+" | "-" | "!" | "~") expr
+  | expr "instanceof" class_name_reference
+  | "(" expr ")"
+  | expr "?" expr ":" expr
+  | internal_functions
+  | "(int)" expr
+  | "(double)" expr
+  | "(float)" expr
+  | "(real)" expr
+  | "(string)" expr
+  | "(array)" expr
+  | "(object)" expr
+  | "(bool)" expr
+  | "(boolean)" expr
+  | "(unset)" expr # FIXME: not implemented
+  | "exit" [exit_expr]
+  | "die" [exit_expr]
+  | "@" expr
+  | scalar
+  | "array" "(" [array_pair_list] ")"
+  | "`" encaps_list "`"
+  | "print" expr ;

@@ -25,7 +25,8 @@ class TreePrinter {
             echo "assign to: {$tree->value}\n";
             break;
           default:
-            echo "Unknown statement node";
+            echo "{$tree->kind}\n";
+            //echo "Unknown statement node";
             break;
         }
       }
@@ -41,7 +42,8 @@ class TreePrinter {
             echo "id: {$tree->value}\n";
             break;
           default:
-            echo "Unknown ExprNode kind\n";
+            //echo "Unknown ExprNode kind\n";
+            echo "{$tree->kind}\n";
             break;
         }
       }

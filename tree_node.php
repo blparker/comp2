@@ -33,11 +33,19 @@ class StmtNode extends TreeNode {
 
 class StmtKind {
   const assignK = 'assignK';
+  const ifK = 'ifK';
+  const elifK = 'elifK';
+  const elseK = 'elseK';
+  const idK = 'idK';
+  const funcK = 'funcK';
 }
 
 class ExpKind {
   const constK = 'constK';
   const opK  = 'opK';
   const idK = 'idK';
+  const nullK = 'nullK';
+  const strK = 'strK';
+  const argK = 'argK';
 }
 
