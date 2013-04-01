@@ -2,6 +2,7 @@
 program     = block
 
 block       = statement { NEWLINE statement }
+inner_block = INDENT block DEDENT
 
 statement   = if_stmt
             | assign_stmt
@@ -11,7 +12,7 @@ statement   = if_stmt
 assign_stmt = 'var' IDENTIFIER [ '=' expr ]
             | IDENTIFIER '=' expr
 
-if_stmt     = 'if' expr NEWLINE block { 'else if' expr NEWLINE block } [ 'else' NEWLINE block ]
+if_stmt     = 'if' expr NEWLINE inner_block { 'else if' expr NEWLINE inner_block } [ 'else' NEWLINE inner_block ]
 
 arith_stmt    = simple_arith [ relop simple_arith ]
 simple_arith  = arith_term { addop arith_term }
@@ -34,4 +35,13 @@ function_call = IDENTIFIER '(' [ expr_list ] ')'
               | IDENTIFIER expr_list
 
 expr_list     = { expr ',' } expr
+
+
+
+foo = 'bar'
+
+if foo == 'bar'
+  echo 'Got a bar!'
+else
+  echo 'Not a bar!'
 

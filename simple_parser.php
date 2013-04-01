@@ -30,7 +30,7 @@ class Parser {
     /* TreeNode */ $t = $this->statement();
     /* TreeNode */ $p = $t;
 
-    while($this->token_type() != TokenType::EOF) {
+    while($this->token_type() != TokenType::EOF && $this->token_type() != TokenType::DEDENT) {
       $this->match(TokenType::NL);
       /* TreeNode */ $q = $this->statement();
 
@@ -44,6 +44,14 @@ class Parser {
         }
       }
     }
+
+    return $t;
+  }
+
+  private function inner_block() {
+    $this->match(TokenType::INDENT);
+    $t = $this->block();
+    $this->match(TokenType::DEDENT);
 
     return $t;
   }
@@ -107,7 +115,7 @@ class Parser {
       $t->add_child($expr);
       $this->match(TokenType::NL);
 
-      $block = $this->block();
+      $block = $this->inner_block();
 
       if($block == null) $this->error();
 
@@ -120,12 +128,10 @@ class Parser {
         }
       }*/
 
-
-      $this->pln("### HERE");
-
       if($this->token_type() == TokenType::ELS) {
         $this->match(TokenType::ELS);
-        $e = $this->block();
+        $this->match(TokenType::NL);
+        $e = $this->inner_block();
 
         if($e == null) $this->error();
 
@@ -233,7 +239,7 @@ class Parser {
       ++$this->idx;
     }
     else {
-      throw new Exception("Match failed. Expected: '$tokenType'; Actual: '{$this->token_type()}'");
+      throw new Exception("Match failed. Expected: '$tokenType'; Actual: '{$this->token_type()}' @ idx {$this->idx}");
     }
   }
 
@@ -296,6 +302,8 @@ class TokenType {
   const STR = 'string';
   const ELIF = 'else if';
   const ELS = 'else';
+  const INDENT = 'indent';
+  const DEDENT = 'dedent';
 }
 
 class Token {
@@ -307,27 +315,24 @@ class Token {
   }
 }
 
-/*$tokens = array(
-  new Token(TokenType::LP, '('),
-  new Token(TokenType::NUM, '2'),
-  new Token(TokenType::ADD, '+'),
-  new Token(TokenType::NUM, '3'),
-  new Token(TokenType::RP, ')'),
-  new Token(TokenType::EOF, '')
-);*/
 $tokens = array(
   new Token(TokenType::_IF, 'if'),
   new Token(TokenType::TRUE, 'true'),
   new Token(TokenType::NL, ''),
+  new Token(TokenType::INDENT, ''),
   new Token(TokenType::ID, 'foo'),
   new Token(TokenType::EQ, '='),
   new Token(TokenType::STR, 'bar'),
   new Token(TokenType::NL, ''),
+  new Token(TokenType::DEDENT, ''),
   new Token(TokenType::ELS, 'else'),
   new Token(TokenType::NL, ''),
+  new Token(TokenType::INDENT, ''),
   new Token(TokenType::ID, 'biz'),
   new Token(TokenType::EQ, '='),
   new Token(TokenType::STR, 'baz'),
+  new Token(TokenType::NL, ''),
+  new Token(TokenType::DEDENT, ''),
   new Token(TokenType::EOF, 'eof')
 );
 $parser = new Parser($tokens);
