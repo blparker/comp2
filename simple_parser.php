@@ -302,9 +302,14 @@ class Parser {
       }
       else {  // Without parens
         $args = $this->expr_list();
-        if($args == null) $this->error();
-
-        $t->add_child($args);
+        if($args == null) {
+          // Need to backtrack
+          --$this->idx;
+          return null;
+        }
+        else {
+          $t->add_child($args);
+        }
       }
     }
 

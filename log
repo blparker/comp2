@@ -1,0 +1,6 @@
+4-1-2013
+=======
+- Working on for statement
+- Currently there are issues with the expr_list; how to determine the difference between IDENTIFIER IDENTIFIER as being function call with IDENTIFIER as argument
+  or two back to back function calls (should be the former)
+    - line in function ~304
