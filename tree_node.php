@@ -38,6 +38,7 @@ class StmtKind {
   const elseK = 'elseK';
   const idK = 'idK';
   const funcK = 'funcK';
+  const forK = 'forK';
 }
 
 class ExpKind {
