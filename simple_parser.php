@@ -1,6 +1,8 @@
 <?php
 
 require_once('tree_node.php');
+require_once('token.php');
+require_once('tokentype.php');
 
 class Parser {
   private $tokens;
@@ -334,6 +336,8 @@ class Parser {
 
     if($tokenType == TokenType::NUL) {
       $t = new ExprNode(ExpKind::nullK);
+
+      $this->match(TokenType::NUL);
     }
     else if(($t = $this->function_call()) != null) {
     }
@@ -396,18 +400,16 @@ class Parser {
         $exprs->add_child($e);
       }
 
-      //if($this->token_type() == TokenType::NL) {
-        //$this->match(TokenType::NL);
-        //break;
-      //}
-
       if($this->token_type() == TokenType::COMMA) {
         $this->match(TokenType::COMMA);
         continue;
       }
-
-      if($this->token_type() == TokenType::NL) {
+      else if($this->token_type() == TokenType::NL ||
+              $this->token_type() == TokenType::EOF) {
         break;
+      }
+      else {
+        $this->error();
       }
     }
 
@@ -461,115 +463,4 @@ class Parser {
   }
 
 }
-
-
-class TokenType {
-  const LTE = '<=';
-  const LT  = '<';
-  const GT  = '>';
-  const GTE = '>=';
-  const EQC = '==';
-  const NE  = '!=';
-  const ADD = '+';
-  const SUB = '-';
-  const MUL = '*';
-  const DIV = '/';
-  const LP  = '(';
-  const RP  = ')';
-  const NUM = 'number';
-  const EOF = 'eof';
-  const NL = 'nl';
-  const ID = 'id';
-  const EQ = '=';
-  const _IF = 'if';
-  const TRUE = 'true';
-  const FALSE = 'false';
-  const NUL = 'null';
-  const STR = 'string';
-  const ELIF = 'else if';
-  const ELS = 'else';
-  const INDENT = 'indent';
-  const DEDENT = 'dedent';
-  const COMMA = 'comma';
-  const _FOR = 'for';
-  const IN = 'in';
-}
-
-class Token {
-  public $type;
-  public $value;
-  public function __construct($type, $value = null) {
-    $this->type = $type;
-    $this->value = $value;
-  }
-}
-
-/*$tokens = array(
-  new Token(TokenType::_IF, 'if'),
-  new Token(TokenType::TRUE, 'true'),
-  new Token(TokenType::NL, ''),
-  new Token(TokenType::INDENT, ''),
-  new Token(TokenType::ID, 'foo'),
-  new Token(TokenType::EQ, '='),
-  new Token(TokenType::STR, 'bar'),
-  new Token(TokenType::NL, ''),
-  new Token(TokenType::ID, 'echo'),
-  new Token(TokenType::STR, 'got a bar!'),
-  new Token(TokenType::NL, ''),
-  new Token(TokenType::DEDENT, ''),
-  new Token(TokenType::ELS, 'else'),
-  new Token(TokenType::NL, ''),
-  new Token(TokenType::INDENT, ''),
-  new Token(TokenType::ID, 'biz'),
-  new Token(TokenType::EQ, '='),
-  new Token(TokenType::STR, 'baz'),
-  new Token(TokenType::NL, ''),
-  new Token(TokenType::DEDENT, ''),
-  new Token(TokenType::EOF, 'eof')
-);*/
-/*$tokens = array(
-  new Token(TokenType::_FOR,    'for'),
-  new Token(TokenType::ID,      'foo'),
-  new Token(TokenType::EQ,      '='),
-  new Token(TokenType::NUM,     '1'),
-  new Token(TokenType::COMMA,   ','),
-  new Token(TokenType::NUM,     '5'),
-  new Token(TokenType::COMMA,   ','),
-  new Token(TokenType::NUM,     '1'),
-  new Token(TokenType::NL,      'nl'),
-  new Token(TokenType::INDENT,  'indent'),
-  new Token(TokenType::ID,      'echo'),
-  new Token(TokenType::ID,      'foo'),
-  new Token(TokenType::NL,      'nl'),
-  new Token(TokenType::DEDENT,  'dedent'),
-  new Token(TokenType::EOF,     'eof')
-);*/
-$tokens = array(
-  new Token(TokenType::_FOR,  'for'),
-  new Token(TokenType::ID,    'foo'),
-  new Token(TokenType::COMMA, ','),
-  new Token(TokenType::ID,    'bar'),
-  new Token(TokenType::IN,    'in'),
-  new Token(TokenType::ID,    'biz'),
-  new Token(TokenType::LP,    '('),
-  new Token(TokenType::RP,    ')'),
-  new Token(TokenType::NL,    'nl'),
-  new Token(TokenType::INDENT,'indent'),
-  new Token(TokenType::ID,    'echo'),
-  new Token(TokenType::ID,    'foo'),
-  new Token(TokenType::NL,    'nl'),
-  new Token(TokenType::DEDENT,'dedent'),
-  new Token(TokenType::EOF,   'eof')
-);
-
-$parser = new Parser($tokens);
-$t = $parser->parse();
-
-//print_r($t);
-
-require_once('tree_printer.php');
-
-$tp = new TreePrinter();
-$tp->print_tree($t);
-
 
