@@ -1,7 +1,7 @@
 <?php
 
-require('parser.php');
-require('tree_printer.php');
+require('../src/parser.php');
+require('../util/tree_printer.php');
 require('test/assert.php');
 
 /******************************************

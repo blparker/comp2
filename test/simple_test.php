@@ -1,7 +1,7 @@
 <?php
 
-require_once('simple_parser.php');
-require_once('tree_printer.php');
+require_once('../src/simple_parser.php');
+require_once('../util/tree_printer.php');
 
 /*
 *
