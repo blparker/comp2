@@ -30,5 +30,6 @@ class TokenType {
   const COMMA = 'comma';
   const _FOR = 'for';
   const IN = 'in';
+  const _WHILE = 'while';
 }
 

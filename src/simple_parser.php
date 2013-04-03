@@ -71,7 +71,7 @@ class Parser {
   }
 
   /*
-  *   statement = if_stmt | for_stmt | assign_stmt | function_call | arith_stmt
+  *   statement = if_stmt | for_stmt | while_stmt | assign_stmt | function_call | arith_stmt
   */
   private function statement() {
     /* TreeNode */ $t = null;
@@ -84,6 +84,9 @@ class Parser {
     }
     else if(($t = $this->for_stmt()) != null) {
       $this->pln("For Stmt");
+    }
+    else if(($t = $this->while_stmt()) != null) {
+      $this->pln("While Stmt");
     }
     else if(($t = $this->assign_stmt()) != null) {
       $this->pln("Assign Stmt");
@@ -240,7 +243,27 @@ class Parser {
   }
 
   /*
-  *   expanded_for  = 'for' IDENTIFIER '=' expr ',' expr, [ ',' expr ] NEWLINE inner_block
+  *   while_stmt = 'while' expr NEWLINE inner_block
+  */
+  private function while_stmt() {
+    /* TreeNode */ $t = null;
+
+    if($this->token_type() == TokenType::_WHILE) {
+      $this->match(TokenType::_WHILE);
+
+      $t = new StmtNode(StmtKind::whileK);
+
+      $e = $this->expr();
+      if($e == null) $this->error();
+
+      $t->add_child($e);
+    }
+
+    return $t;
+  }
+
+  /*
+  *   expanded_for = 'for' IDENTIFIER '=' expr ',' expr, [ ',' expr ] NEWLINE inner_block
   */
   private function expanded_for() {
     /* TreeNode */ $t = null;

@@ -39,6 +39,7 @@ class StmtKind {
   const idK = 'idK';
   const funcK = 'funcK';
   const forK = 'forK';
+  const whileK = 'whileK';
 }
 
 class ExpKind {
