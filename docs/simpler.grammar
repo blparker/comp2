@@ -21,22 +21,21 @@ condensed_for = 'for' identifier_list 'in' expr_list NEWLINE inner_block
 
 while_stmt    = 'while' expr NEWLINE inner_block
 
-arith_stmt    = simple_arith [ relop simple_arith ]
-simple_arith  = arith_term { addop arith_term }
+compound_stmt = simple_arith [ relop simple_arith ]
+simple_arith  = term { addop term }
 relop         = '<=' | '<' | '>' | '>=' | '==' | '!='
 addop         = '+' | '-'
-arith_term    = arith_factor { mulop arith_factor }
+term          = factor { mulop factor }
 mulop         = '*' | '/'
-arith_factor  = '(' arith_stmt ')' | NUMBER | IDENTIFIER
+factor        = '(' compound_stmt ')' | simple_type | function_call
 
-expr        = null
+expr        = expr_rest [ relop expr ] | expr_rest
+expr_rest   = null
             | function_call
+            | compound_stmt
             | simple_type
-//            | compound_type
-//            | function
 
 simple_type = true | false | NUMBER | STRING | IDENTIFIER
-compound_type = array_decl
 
 function_call = IDENTIFIER '(' [ expr_list ] ')'
               | IDENTIFIER expr_list
@@ -45,3 +44,26 @@ expr_list       = { expr ',' } expr
 identifier_list = IDENTIFIER { ',' IDENTIFIER }
 
 
+
+/* Eliminating left recursion */
+expr  = expr [ relop expr ] | function_call | simple_type
+expr  = function_call expr' | simple_type expr'
+expr' = [ relop expr] expr' | e
+/* End eliminating left recursion */
+
+
+expr = expr op expr
+
+compound_stmt = simple_arith [ relop simple_arith ]
+simple_arith  = term { addop term }
+relop         = '<=' | '<' | '>' | '>=' | '==' | '!='
+addop         = '+' | '-'
+term          = factor { mulop factor }
+mulop         = '*' | '/'
+factor        = '(' compound_stmt ')' | simple_type | function_call
+
+expr        = expr_rest [ relop expr ]
+expr_rest   = null
+            | function_call
+            | compound_stmt
+            | simple_type
