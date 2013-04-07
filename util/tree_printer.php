@@ -24,6 +24,9 @@ class TreePrinter {
           case StmtKind::assignK:
             echo "assign to: {$tree->value}\n";
             break;
+          case StmtKind::funcdefK:
+            echo "function def: {$tree->value}\n";
+            break;
           default:
             echo "{$tree->kind}\n";
             //echo "Unknown statement node";

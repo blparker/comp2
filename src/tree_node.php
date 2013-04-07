@@ -38,8 +38,10 @@ class StmtKind {
   const elseK = 'elseK';
   const idK = 'idK';
   const funcK = 'funcK';
+  const funcdefK = 'funcdefK';
   const forK = 'forK';
   const whileK = 'whileK';
+  const dowhileK = 'dowhileK';
 }
 
 class ExpKind {
@@ -52,5 +54,6 @@ class ExpKind {
   const relopK = 'relopK';
   const addopK = 'addopK';
   const multopK = 'multopK';
+  const idlistK = 'idlistK';
 }
 

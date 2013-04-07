@@ -71,7 +71,7 @@ class Parser {
   }
 
   /*
-  *   statement = if_stmt | for_stmt | while_stmt | assign_stmt | function_call | arith_stmt
+  *   statement = if_stmt | for_stmt | while_stmt | do_while_stmt | assign_stmt | function_call | arith_stmt
   */
   private function statement() {
     /* TreeNode */ $t = null;
@@ -87,6 +87,9 @@ class Parser {
     }
     else if(($t = $this->while_stmt()) != null) {
       $this->pln("While Stmt");
+    }
+    else if(($t = $this->do_while_stmt()) != null) {
+      $this->pln('Do while stmt');
     }
     else if(($t = $this->assign_stmt()) != null) {
       $this->pln("Assign Stmt");
@@ -263,6 +266,43 @@ class Parser {
   }
 
   /*
+  *   do_while_stmt = 'do' NEWLINE inner_block 'while' expr NEWLINE
+  */
+  private function do_while_stmt() {
+    /* TreeNode */ $t = null;
+
+    if($this->token_type() == TokenType::_DO) {
+      // 'do'
+      $this->match(TokenType::_DO);
+
+      $t = new StmtNode(StmtKind::dowhileK);
+
+      // NEWLINE
+      $this->match(TokenType::NL);
+
+      // inner_block
+      $block = $this->inner_block();
+      if($block != null) {
+        $t->add_child($block);
+      }
+
+      // 'while'
+      $this->match(TokenType::_WHILE);
+
+      // expr
+      $e = $this->expr();
+      if($e == null) $this->error();
+
+      $t->add_child($e);
+
+      // NEWLINE
+      $this->match($this->_or(TokenType::NL, TokenType::EOF));
+    }
+
+    return $t;
+  }
+
+  /*
   *   expanded_for = 'for' IDENTIFIER '=' expr ',' expr, [ ',' expr ] NEWLINE inner_block
   */
   private function expanded_for() {
@@ -276,6 +316,75 @@ class Parser {
   */
   private function condensed_for() {
     /* TreeNode */ $t = null;
+
+    return $t;
+  }
+
+  /*
+  *   IDENTIFIER '=' '(' [ id_list ] ')' '->' NEWLINE inner_block
+  */
+  private function func_def_stmt() {
+    /* TreeNode */ $t = null;
+
+    // A function definition must begin with an identifier,
+    // followed by an equal sign ('='), followed by a left
+    // paren ('(')
+    if($this->token_type() == TokenType::ID &&
+       $this->look_ahead(1)->type == TokenType::EQ &&
+       $this->look_ahead(2)->type == TokenType::LP) {
+
+      $t = new StmtNode(StmtKind::funcdefK);
+      $t->value($this->token_value());
+
+      $this->match(TokenType::ID);
+      $this->match(TokenType::EQ);
+      $this->match(TokenType::LP);
+
+      // id_list
+      if($this->token_type() == TokenType::ID) {
+        $ids = new ExprNode(ExpKind::idlistK);
+
+        // IDENTIFIER
+        while($this->token_type() == TokenType::ID) {
+          $i = new ExprNode(ExpKind::idK);
+          $i->value($this->token_value());
+
+          // IDENTIFIER
+          $this->match(TokenType::ID);
+
+          $ids->add_child($i);
+
+          // COMMA
+          if($this->token_type() == TokenType::COMMA) {
+            $this->match(TokenType::COMMA);
+            continue;
+          }
+          else if($this->token_type() != TokenType::RP) {
+            // If we don't have a comma, and the next token isn't the closing right paren, throw an error
+            $this->error();
+          }
+        }
+        $t->add_child($ids);
+      }
+      else if($this->token_type() == TokenType::RP) {
+        // Don't do anything, we match it below
+      }
+      else {
+        $this->error();
+      }
+
+      $this->match(TokenType::RP);
+      $this->match(TokenType::FUNCG);
+      $this->match(TokenType::NL);
+
+      $block = $this->inner_block();
+
+      if($block != null) {
+        $t->add_child($block);
+      }
+
+      // inner_block
+    }
 
     return $t;
   }
@@ -524,12 +633,29 @@ class Parser {
   * Utility Methods
   ****************/
   private function match(/* TokenType */ $tokenType) {
-    if($this->token_type() == $tokenType) {
-      ++$this->idx;
+    if(is_array($tokenType)) {
+      if($this->token_type() == $tokenType[0] ||
+         $this->token_type() == $tokenType[1]) {
+        ++$this->idx;
+      }
+      else {
+        throw new Exception("Match failed. Expected: '$tokenType'; Actual: '{$this->token_type()}' @ idx {$this->idx}");
+      }
     }
     else {
-      throw new Exception("Match failed. Expected: '$tokenType'; Actual: '{$this->token_type()}' @ idx {$this->idx}");
+      if($this->token_type() == $tokenType) {
+        ++$this->idx;
+      }
+      else {
+        throw new Exception("Match failed. Expected: '$tokenType'; Actual: '{$this->token_type()}' @ idx {$this->idx}");
+      }
     }
+  }
+
+  private function _or($tokenType1, $tokenType2) {
+    return array(
+      $tokenType1, $tokenType2
+    );
   }
 
   private function token_type() {
