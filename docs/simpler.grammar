@@ -62,8 +62,12 @@ term          = factor { mulop factor }
 mulop         = '*' | '/'
 factor        = '(' compound_stmt ')' | simple_type | function_call
 
-expr        = expr_rest [ relop expr ]
+expr        = expr_addop [ relop expr_addop ]
+expr_addop  = expr_term { addop expr_term }
+expr_term   = expr_factor { mulop expr_factor }
+expr_factor = '(' expr ')' | expr_rest
+
 expr_rest   = null
             | function_call
-            | compound_stmt
             | simple_type
+

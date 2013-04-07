@@ -356,6 +356,85 @@ class Parser {
   private function expr() {
     /* TreeNode */ $t = null;
     /* TokenType */ $tokenType = $this->token_type();
+    
+    if(($t = $this->expr_addop()) != null) {
+    }
+
+    if($this->token_type() == TokenType::RELOP) {
+      $r = new ExprNode(ExpKind::relopK);
+      $r->value($this->token_value());
+
+      $this->match(TokenType::RELOP);
+
+      $q = $this->expr_addop();
+
+      if($q == null) $this->error();
+
+      $r->add_child($t);
+      $r->add_child($q);
+
+      $t = $r;
+    }
+
+    return $t;
+  }
+
+  private function expr_addop() {
+    /* TreeNode */ $t = null;
+
+    if(($t = $this->expr_term()) != null) {
+
+      while($this->token_type() == TokenType::ADDOP) {
+        if($this->token_type() == TokenType::ADDOP) {
+          $r = new ExprNode(ExpKind::addopK);
+          $r->value($this->token_value());
+
+          $this->match(TokenType::ADDOP);
+
+          $q = $this->expr_term();
+
+          if($q == null) $this->error();
+
+          $r->add_child($t);
+          $r->add_child($q);
+
+          $t = $r;
+        }
+      }
+    }
+
+    return $t;
+  }
+
+  private function expr_term() {
+    /* TreeNode */ $t = null;
+
+    if(($t = $this->expr_factor()) != null) {
+      while($this->token_type() == TokenType::MULTOP) {
+        if($this->token_type() == TokenType::MULTOP) {
+          $r = new ExprNode(ExpKind::multopK);
+          $r->value($this->token_value());
+
+          $this->match(TokenType::MULTOP);
+
+          $q = $this->expr_factor();
+
+          if($q == null) $this->error();
+
+          $r->add_child($t);
+          $r->add_child($q);
+
+          $t = $r;
+        }
+      }
+    }
+
+    return $t;
+  }
+
+  private function expr_factor() {
+    /* TreeNode */ $t = null;
+    /* TokenType */ $tokenType = $this->token_type();
 
     if($tokenType == TokenType::NUL) {
       $t = new ExprNode(ExpKind::nullK);
@@ -418,7 +497,7 @@ class Parser {
 
       if($e != null) {
         if($exprs == null) {
-          $exprs = new ExprNode(ExpKind::argK);
+          $exprs = new ExprNode(ExpKind::arglistK);
         }
         $exprs->add_child($e);
       }
@@ -428,6 +507,7 @@ class Parser {
         continue;
       }
       else if($this->token_type() == TokenType::NL ||
+              $this->token_type() == TokenType::RP ||
               $this->token_type() == TokenType::EOF) {
         break;
       }

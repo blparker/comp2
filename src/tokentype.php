@@ -31,5 +31,8 @@ class TokenType {
   const _FOR = 'for';
   const IN = 'in';
   const _WHILE = 'while';
+  const RELOP = 'relop';
+  const ADDOP = 'addop';
+  const MULTOP = 'multop';
 }
 

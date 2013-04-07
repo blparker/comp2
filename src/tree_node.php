@@ -48,6 +48,9 @@ class ExpKind {
   const idK = 'idK';
   const nullK = 'nullK';
   const strK = 'strK';
-  const argK = 'argK';
+  const arglistK = 'arglistK';
+  const relopK = 'relopK';
+  const addopK = 'addopK';
+  const multopK = 'multopK';
 }
 

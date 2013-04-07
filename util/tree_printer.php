@@ -41,6 +41,15 @@ class TreePrinter {
           case ExpKind::idK:
             echo "id: {$tree->value}\n";
             break;
+          case ExpKind::addopK:
+            echo "addop: {$tree->value}\n";
+            break;
+          case ExpKind::relopK:
+            echo "relop: {$tree->value}\n";
+            break;
+          case ExpKind::multopK:
+            echo "multop: {$tree->value}\n";
+            break;
           default:
             //echo "Unknown ExprNode kind\n";
             echo "{$tree->kind}\n";
