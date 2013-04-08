@@ -10,6 +10,7 @@ statement   = if_stmt
             | do_while_stmt
             | func_def_stmt
             | class_def_stmt
+            | switch_stmt
             | assign_stmt
             | function_call
             | arith_stmt
@@ -39,6 +40,9 @@ access_level   = 'static' | 'abstract' | 'final'
 class_prop     = [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
 static_scalar  = simple_type | array_decl | static_class_reference
 class_const    = 'const' IDENTIFIER '=' simple_type { ',' IDENTIFIER '=' simple_type }
+
+switch_stmt    = 'switch' expr NEWLINE INDENT { switch_case } [ 'default' inner_block ] NEWLINE DEDENT
+switch_case    = 'case' expr_list NEWLINE inner_block NEWLINE
 
 compound_stmt = simple_arith [ relop simple_arith ]
 simple_arith  = term { addop term }

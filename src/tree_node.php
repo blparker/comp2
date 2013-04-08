@@ -42,6 +42,8 @@ class StmtKind {
   const forK = 'forK';
   const whileK = 'whileK';
   const dowhileK = 'dowhileK';
+  const switchK = 'switchK';
+  const caseK = 'caseK';
 }
 
 class ExpKind {

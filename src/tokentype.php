@@ -36,5 +36,6 @@ class TokenType {
   const ADDOP = 'addop';
   const MULTOP = 'multop';
   const FUNCG = '->';
+  const _SWITCH = 'switch';
 }
 

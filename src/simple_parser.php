@@ -416,6 +416,55 @@ class Parser {
   }
 
   /*
+  *
+  */
+  private function switch_stmt() {
+    /* TreeNode */ $t = null;
+
+    if($this->token_type() == TokenType::_SWITCH) {
+      $this->match(TokenType::_SWITCH);
+
+      $t = new StmtNode(StmtKind::switchK);
+
+      $expr = $this->expr();
+      if($expr == null) $this->error();
+
+      $t->add_child($expr);
+
+      $this->match(TokenType::NL);
+      $this->match(TokenType::INDENT);
+
+      while($this->token_type() == TokenType::_CASE) {
+        $c = new StmtNode(StmtKind::caseK);
+        $this->match(TokenType::_CASE);
+
+        $e = $this->expr();
+        if($e == null) $this->error();
+
+        $c->add_child($e);
+
+        // NL
+        $this->match(TokenType::NL);
+
+        $b = $this->inner_block();
+        if($b != null) {
+          $c->add_child($b);
+        }
+
+        $t->add_child($c);
+
+        // NL
+        $this->match(TokenType::NL);
+      }
+
+      $this->match(TokenType::NL);
+      $this->match(TokenType::DEDENT);
+    }
+
+    return $t;
+  }
+
+  /*
   *   assign_stmt = 'var' IDENTIFIER [ '=' expr ] | IDENTIFIER '=' expr
   */
   private function assign_stmt() {
@@ -715,6 +764,10 @@ class Parser {
     //array_shift($t);
     $caller = array_shift($t);
     echo "{$caller['class']}->{$caller['function']}, line {$caller['line']} - {$str}\n";
+  }
+
+  private function is_type($type) {
+    return $this->token_type() == $type;
   }
 
 }
