@@ -22,21 +22,23 @@ for_stmt      = expanded_for | condensed_for
 expanded_for  = 'for' IDENTIFIER '=' expr ',' expr, [ ',' expr ] NEWLINE inner_block
 condensed_for = 'for' identifier_list 'in' expr_list NEWLINE inner_block
 
-while_stmt    = 'while' expr NEWLINE inner_block
-do_while_stmt = 'do' NEWLINE inner_block 'while' expr NEWLINE
-func_def_stmt = IDENTIFIER '=' '(' [ id_list ] ')' '->' NEWLINE inner_block
-id_list       = IDENTIFIER { ',' IDENTIFIER }
+while_stmt     = 'while' expr NEWLINE inner_block
+do_while_stmt  = 'do' NEWLINE inner_block 'while' expr NEWLINE
+func_def_stmt  = IDENTIFIER '=' [ func_args_list ]  '->' NEWLINE inner_block
+func_args_list = '(' [ id_list ] ')'
+id_list        = IDENTIFIER { ',' IDENTIFIER }
 
-class_def_stmt = [ class_level ] 'class' IDENTIFIER [ class_def_rest ] NEWLINE class_body
-class_level    = 'abstract' | 'final'
+class_def_stmt = [ class_entry ] 'class' IDENTIFIER [ class_def_rest ] NEWLINE class_body
+class_entry    = 'abstract' | 'final'
 class_def_rest = [ 'extends' IDENTIFIER ] [ 'implements' id_list ]
 class_body     = INDENT { class_stmt } DEDENT
 class_stmt     = class_method | class_prop | class_const
 class_method   = [ access_modifier ] { access_level } function_def_stmt
 access_modifer = 'public' | 'private' | 'protected' 
 access_level   = 'static' | 'abstract' | 'final'
-class_prop     = [ access_modifier ] [ 'static' ] IDENTIFIER '='
-class_const    = 'const' IDENTIFIER '=' simple_type
+class_prop     = [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
+static_scalar  = simple_type | array_decl | static_class_reference
+class_const    = 'const' IDENTIFIER '=' simple_type { ',' IDENTIFIER '=' simple_type }
 
 compound_stmt = simple_arith [ relop simple_arith ]
 simple_arith  = term { addop term }

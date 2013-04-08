@@ -321,7 +321,7 @@ class Parser {
   }
 
   /*
-  *   IDENTIFIER '=' '(' [ id_list ] ')' '->' NEWLINE inner_block
+  *   func_def_stmt  = IDENTIFIER '=' [ func_args_list ]  '->' NEWLINE inner_block
   */
   private function func_def_stmt() {
     /* TreeNode */ $t = null;
@@ -338,11 +338,47 @@ class Parser {
 
       $this->match(TokenType::ID);
       $this->match(TokenType::EQ);
+
+      if($this->token_type() == TokenType::LP) {
+        $args = $this->func_args_list();
+
+        if($args != null) {
+          $t->add_child($args);
+        }
+      }
+      else if($this->token_type() != TokenType::FUNCG) {
+        $this->error();
+      }
+
+      $this->match(TokenType::FUNCG);
+      $this->match(TokenType::NL);
+
+      $block = $this->inner_block();
+
+      if($block != null) {
+        $t->add_child($block);
+      }
+
+      // inner_block
+    }
+
+    return $t;
+  }
+
+  /*
+  *   func_args_list = '(' [ id_list ] ')'
+  */
+  private function func_args_list() {
+    /* TreeNode */ $t = null;
+
+    if($this->token_type() == TokenType::LP) {
+
+      // '('
       $this->match(TokenType::LP);
 
       // id_list
       if($this->token_type() == TokenType::ID) {
-        $ids = new ExprNode(ExpKind::idlistK);
+        $t = new ExprNode(ExpKind::idlistK);
 
         // IDENTIFIER
         while($this->token_type() == TokenType::ID) {
@@ -352,7 +388,7 @@ class Parser {
           // IDENTIFIER
           $this->match(TokenType::ID);
 
-          $ids->add_child($i);
+          $t->add_child($i);
 
           // COMMA
           if($this->token_type() == TokenType::COMMA) {
@@ -364,7 +400,6 @@ class Parser {
             $this->error();
           }
         }
-        $t->add_child($ids);
       }
       else if($this->token_type() == TokenType::RP) {
         // Don't do anything, we match it below
@@ -373,17 +408,8 @@ class Parser {
         $this->error();
       }
 
+      // ')'
       $this->match(TokenType::RP);
-      $this->match(TokenType::FUNCG);
-      $this->match(TokenType::NL);
-
-      $block = $this->inner_block();
-
-      if($block != null) {
-        $t->add_child($block);
-      }
-
-      // inner_block
     }
 
     return $t;
