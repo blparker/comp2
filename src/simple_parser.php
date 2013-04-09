@@ -435,6 +435,41 @@ class Parser {
       $this->match(TokenType::INDENT);
 
       while($this->token_type() == TokenType::_CASE) {
+        $case = $this->switch_case_stmt();
+
+        if($case == null) $this->error();
+
+        $t->add_child($case);
+      }
+
+      if($this->token_type() == TokenType::_DEFAULT) {
+        $d = new StmtNode(StmtKind::defaultK);
+        $this->match(TokenType::_DEFAULT);
+
+        $this->match(TokenType::NL);
+        $b = $this->inner_block();
+
+        if($b != null) {
+          $d->add_child($b);
+        }
+
+        $t->add_child($b);
+      }
+
+      //$this->match(TokenType::NL);
+      $this->match(TokenType::DEDENT);
+    }
+
+    return $t;
+  }
+
+  /*
+  *
+  */
+  private function switch_case_stmt() {
+    /* TreeNode */ $c = null;
+
+    if($this->token_type() == TokenType::_CASE) {
         $c = new StmtNode(StmtKind::caseK);
         $this->match(TokenType::_CASE);
 
@@ -451,17 +486,11 @@ class Parser {
           $c->add_child($b);
         }
 
-        $t->add_child($c);
-
         // NL
         $this->match(TokenType::NL);
-      }
-
-      $this->match(TokenType::NL);
-      $this->match(TokenType::DEDENT);
     }
 
-    return $t;
+    return $c;
   }
 
   /*

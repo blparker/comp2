@@ -41,7 +41,7 @@ class_prop     = [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
 static_scalar  = simple_type | array_decl | static_class_reference
 class_const    = 'const' IDENTIFIER '=' simple_type { ',' IDENTIFIER '=' simple_type }
 
-switch_stmt    = 'switch' expr NEWLINE INDENT { switch_case } [ 'default' inner_block ] NEWLINE DEDENT
+switch_stmt    = 'switch' expr NEWLINE INDENT { switch_case } [ 'default' NEWLINE inner_block ] NEWLINE DEDENT
 switch_case    = 'case' expr_list NEWLINE inner_block NEWLINE
 
 compound_stmt = simple_arith [ relop simple_arith ]
