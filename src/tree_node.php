@@ -31,6 +31,12 @@ class StmtNode extends TreeNode {
   }
 }
 
+class AttrNode extends TreeNode {
+  public function __construct(/*SmtKind*/ $kind) {
+    $this->kind = $kind;
+  }
+}
+
 class StmtKind {
   const assignK = 'assignK';
   const ifK = 'ifK';
@@ -45,6 +51,7 @@ class StmtKind {
   const switchK = 'switchK';
   const caseK = 'caseK';
   const defaultK = 'defaultK';
+  const classK = 'classK';
 }
 
 class ExpKind {
@@ -58,5 +65,12 @@ class ExpKind {
   const addopK = 'addopK';
   const multopK = 'multopK';
   const idlistK = 'idlistK';
+}
+
+class AttrKind {
+  const classentryK = 'classentryk';
+  const modifierK = 'modifierK';
+  const extendsK = 'extendsK';
+  const implementsK = 'implementsK';
 }
 

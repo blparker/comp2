@@ -558,6 +558,77 @@ class Parser {
   public function arith_stmt() {
     return null;
   }
+
+  /*
+  *   class_def_stmt = [ class_entry ] 'class' IDENTIFIER [ class_def_rest ] NEWLINE class_body
+  */
+  private function class_def_stmt() {
+    /* TreeNode */ $c = null;
+    /* TreeNode */ $entry = null;
+
+    // class_entry ('abstract' | 'final')
+    if($this->token_type() == TokenType::_ABSTRACT ||
+       $this->token_type() == TokenType::_FINAL) {
+
+      $entry = new AttrNode(AttrKind::classentryK);
+      $entry->value($this->token_value());
+
+      $this->match(array(TokenType::_ABSTRACT, TokenType::_FINAL));
+    }
+
+    // 'class'
+    $this->match(TokenType::_CLASS);
+    $c = new StmtNode(StmtKind::classK);
+
+    if($entry != null) $c->add_child($entry);
+
+    // IDENTIFIER
+    $name = new ExprNode(ExpKind::idK);
+    $name->value($this->token_value());
+    $this->match(TokenType::ID);
+
+    if($this->token_type() == TokenType::_EXTENDS) {
+      $this->match(TokenType::_EXTENDS);
+      
+      $extends = new AttrNode(AttrKind::extendsK);
+
+      $i = new ExprNode(ExpKind::idK);
+      $i->value($this->token_value());
+      $this->match(TokenType::ID);
+
+      $extends->add_child($i);
+      $c->add_child($extends);
+    }
+
+    if($this->token_type() == TokenType::_IMPLEMENTS) {
+      $this->match(TokenType::_IMPLEMENTS);
+      
+      $implements = new AttrNode(AttrKind::implementsK);
+
+      $ids = new ExprNode(ExpKind::idlistK);
+      while($this->token_type() == TokenType::ID) {
+        $i = new ExprNode(ExpKind::idK);
+        $i->value($this->token_value());
+        $ids->add_child($i);
+        $this->match(TokenType::ID);
+
+        if($this->token_type() == TokenType::COMMA) {
+          $this->match(TokenType::COMMA);
+          continue;
+        }
+        else {
+          break;
+        }
+      }
+
+      $implements->add_child($ids);
+      $c->add_child($implements);
+    }
+
+    // ...
+
+    return $c;
+  }
   /***************
   * End Statements
   ***************/

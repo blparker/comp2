@@ -39,5 +39,10 @@ class TokenType {
   const _SWITCH = 'switch';
   const _CASE = 'case';
   const _DEFAULT = 'default';
+  const _CLASS = 'class';
+  const _ABSTRACT = 'abstract';
+  const _FINAL = 'final';
+  const _EXTENDS = 'extends';
+  const _IMPLEMENTS = 'implements';
 }
 
