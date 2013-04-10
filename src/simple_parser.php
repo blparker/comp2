@@ -582,9 +582,11 @@ class Parser {
 
     if($entry != null) $c->add_child($entry);
 
-    // IDENTIFIER
     $name = new ExprNode(ExpKind::idK);
     $name->value($this->token_value());
+    $c->add_child($name);
+
+    // IDENTIFIER
     $this->match(TokenType::ID);
 
     if($this->token_type() == TokenType::_EXTENDS) {
@@ -625,7 +627,85 @@ class Parser {
       $c->add_child($implements);
     }
 
-    // ...
+    $this->match(TokenType::NL);
+    $this->match(TokenType::INDENT);
+
+    // Class property
+    /* TreeNode */ $p = null;
+
+    if(($p = $this->class_method()) != null) {
+    }
+    else if(($p = $this->class_prop()) != null) {
+      print_r($p);
+    }
+    else if(($p = $this->class_const()) != null) {
+    }
+
+    return $c;
+  }
+
+  /*
+  *   class_method = [ access_modifier ] { access_level } function_def_stmt
+  */
+  private function class_method() {
+    /* TreeNode */ $m = null;
+
+    return $m;
+  }
+
+  /*
+  *   class_prop = access_modifier [ 'static' ] IDENTIFIER [ '=' static_scalar ]
+  *              | [ access_modifier ] 'static' IDENTIFIER [ '=' static_scalar ]
+  *              | [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
+  */
+  private function class_prop() {
+    /* TreeNode */ $prop = null;
+    /* TreeNode */ $modifier = null;
+    /* TreeNode */ $static = null;
+    /* TreeNode */ $id = null;
+    /* TreeNode */ $val = null;
+
+    if($this->token_type() == TokenType::MODIFIER) {
+      $modifier = new AttrNode(AttrKind::modifierK);
+      $modifier->value($this->token_value());
+      $this->match(TokenType::MODIFIER);
+    }
+
+    //if($this->token_type() == TokenType::_STATIC) {
+    //}
+
+    // IDENTIFIER
+    $id = new ExprNode(ExpKind::idK);
+    $id->value($this->token_value());
+    $this->match(TokenType::ID);
+
+    if($this->token_type() == TokenType::EQ) {
+      $assign = new StmtNode(StmtKind::assignK);
+      $assign->add_child($id);
+
+      $this->match(TokenType::EQ);
+      $val = $this->static_scalar();
+
+      if($val != null) {
+        $assign->add_child($val);
+      }
+    }
+    else {
+      if($modifier == null && $static == null) {
+        $this->error();
+      }
+    }
+
+    $prop->add_child($id);
+
+    return $prop;
+  }
+
+  /*
+  *   class_const = 'const' IDENTIFIER '=' simple_type { ',' IDENTIFIER '=' simple_type }
+  */
+  private function class_const() {
+    /* TreeNode */ $c = null;
 
     return $c;
   }

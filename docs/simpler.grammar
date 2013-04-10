@@ -37,7 +37,9 @@ class_stmt     = class_method | class_prop | class_const
 class_method   = [ access_modifier ] { access_level } function_def_stmt
 access_modifer = 'public' | 'private' | 'protected' 
 access_level   = 'static' | 'abstract' | 'final'
-class_prop     = [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
+class_prop = access_modifier [ 'static' ] IDENTIFIER [ '=' static_scalar ]
+           | [ access_modifier ] 'static' IDENTIFIER [ '=' static_scalar ]
+           | [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
 static_scalar  = simple_type | array_decl | static_class_reference
 class_const    = 'const' IDENTIFIER '=' simple_type { ',' IDENTIFIER '=' simple_type }
 

@@ -44,5 +44,6 @@ class TokenType {
   const _FINAL = 'final';
   const _EXTENDS = 'extends';
   const _IMPLEMENTS = 'implements';
+  const MODIFIER = 'modifier';
 }
 
