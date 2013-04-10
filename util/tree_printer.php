@@ -59,6 +59,16 @@ class TreePrinter {
             break;
         }
       }
+      else if($tree instanceof AttrNode) {
+        switch($tree->kind) {
+          case AttrKind::modifierK:
+            echo "modifier: {$tree->value}\n";
+            break;
+          default:
+            echo "{$tree->kind}\n";
+            break;
+        }
+      }
       else {
         echo "Unknown node kind\n";
       }

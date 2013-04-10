@@ -45,5 +45,6 @@ class TokenType {
   const _EXTENDS = 'extends';
   const _IMPLEMENTS = 'implements';
   const MODIFIER = 'modifier';
+  const _STATIC = 'static';
 }
 

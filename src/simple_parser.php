@@ -627,6 +627,7 @@ class Parser {
       $c->add_child($implements);
     }
 
+    // Have to account for an arbitrary number of newlines
     $this->match(TokenType::NL);
     $this->match(TokenType::INDENT);
 
@@ -636,7 +637,8 @@ class Parser {
     if(($p = $this->class_method()) != null) {
     }
     else if(($p = $this->class_prop()) != null) {
-      print_r($p);
+      //print_r($p);
+      $c->add_child($p);
     }
     else if(($p = $this->class_const()) != null) {
     }
@@ -652,6 +654,48 @@ class Parser {
 
     return $m;
   }
+
+  /*
+  *     CLASS PROP ALT (testing)
+  */
+  private function class_prop_alt() {
+
+    if($this->token_type() == TokenType::MODIFIER) {
+      $this->match(TokenType::MODIFIER);
+
+      if($this->token_type() == TokenType::_STATIC) {
+        $this->match(TokenType::_STATIC);
+      }
+
+      $this->match(TokenType::ID);
+
+      if($this->match(TokenType::EQ) {
+        $this->match(TokenType::EQ);
+        $scalar = $this->static_scalar();
+      }
+    }
+    else {
+      if($this->token_type() == TokenType::_STATIC) {
+        $this->match(TokenType::_STATIC);
+        $this->match(TokenType::ID);
+
+        if($this->token_type() == TokenType::EQ) {
+          $this->match(TokenType::EQ);
+          $scalar = $this->static_scalar();
+        }
+      }
+      else if($this->token_type() == TokenType::ID) {
+        $this->match(TokenType::ID);
+        $this->match(TokenType::EQ);
+
+        $scalar = $this->static_scalar();
+      }
+      else {
+        $this->error();
+      }
+    }
+  }
+
 
   /*
   *   class_prop = access_modifier [ 'static' ] IDENTIFIER [ '=' static_scalar ]
@@ -671,13 +715,17 @@ class Parser {
       $this->match(TokenType::MODIFIER);
     }
 
-    //if($this->token_type() == TokenType::_STATIC) {
-    //}
+    if($this->token_type() == TokenType::_STATIC) {
+      $static = new AttrNode(AttrKind::staticK);
+      $this->match(TokenType::_STATIC);
+    }
 
     // IDENTIFIER
     $id = new ExprNode(ExpKind::idK);
     $id->value($this->token_value());
     $this->match(TokenType::ID);
+
+    /* TreeNode */ $assign = null;
 
     if($this->token_type() == TokenType::EQ) {
       $assign = new StmtNode(StmtKind::assignK);
@@ -694,6 +742,12 @@ class Parser {
       if($modifier == null && $static == null) {
         $this->error();
       }
+    }
+
+    $prop = new StmtNode(StmtKind::classpropK);
+
+    if($modifier != null) {
+      $prop->add_child($modifier);
     }
 
     $prop->add_child($id);

@@ -52,6 +52,7 @@ class StmtKind {
   const caseK = 'caseK';
   const defaultK = 'defaultK';
   const classK = 'classK';
+  const classpropK = 'classpropK';
 }
 
 class ExpKind {
