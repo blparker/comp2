@@ -53,6 +53,7 @@ class StmtKind {
   const defaultK = 'defaultK';
   const classK = 'classK';
   const classpropK = 'classpropK';
+  const classconstK = 'classconstK';
 }
 
 class ExpKind {

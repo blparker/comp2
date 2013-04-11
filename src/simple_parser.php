@@ -755,6 +755,42 @@ class Parser {
   private function class_const() {
     /* TreeNode */ $c = null;
 
+    if($this->token_type() == TokenType::_CONST) {
+      // 'const'
+      $this->match(TokenType::_CONST);
+      $c = new StmtNode(StmtKind::constK);
+
+      // IDENTIFIER
+      $id = new StmtNode(StmtKind::idK);
+      $id->value($this->token_value());
+      $this->match(TokenType::ID);
+
+      // '='
+      $this->match(TokenType::EQ);
+
+      // simple_type
+      $type = $this->simple_type();
+            
+      if($type == null) $this->error();
+
+      $assign = new StmtNode(StmtKind::assignK);
+      $assign->add_child($id);
+      $assign->add_child($type);
+      $c->add_child($assign);
+
+      while($this->token_type() == TokenType::COMMA) {
+        $this->match(TokenType::COMMA);
+        $type = $this->simple_type();
+      }
+
+      if($this->token-type() == TokenType::NL) {
+        $this->match(TokenType::NL);
+      }
+      else {
+        $this->error();
+      }
+    }
+
     return $c;
   }
 
