@@ -634,15 +634,21 @@ class Parser {
     // Class property
     /* TreeNode */ $p = null;
 
-    if(($p = $this->class_method()) != null) {
-    }
-    else if(($p = $this->class_prop()) != null) {
-      //print_r($p);
-      $c->add_child($p);
-    }
-    else if(($p = $this->class_const()) != null) {
-    }
+    while($this->token_type() != TokenType::EOF && $this->token_type() != TokenType::DEDENT) {
 
+      if(($p = $this->class_method()) != null) {
+      }
+      else if(($p = $this->class_prop()) != null) {
+        //print_r($p);
+        $c->add_child($p);
+      }
+      else if(($p = $this->class_const()) != null) {
+      }
+      else {
+        $this->error();
+      }
+
+    }
     return $c;
   }
 
@@ -710,6 +716,13 @@ class Parser {
         if($static != null) $prop->add_child($static);
 
         $prop->add_child($assign);
+
+        if($this->token_type() == TokenType::NL) {
+          $this->match(TokenType::NL);
+        }
+        else {
+          $this->error();
+        }
       }
       else {
         $this->backtrack($backtrack);
