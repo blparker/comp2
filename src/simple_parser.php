@@ -656,101 +656,82 @@ class Parser {
   }
 
   /*
-  *     CLASS PROP ALT (testing)
-  */
-  private function class_prop_alt() {
-
-    if($this->token_type() == TokenType::MODIFIER) {
-      $this->match(TokenType::MODIFIER);
-
-      if($this->token_type() == TokenType::_STATIC) {
-        $this->match(TokenType::_STATIC);
-      }
-
-      $this->match(TokenType::ID);
-
-      if($this->match(TokenType::EQ) {
-        $this->match(TokenType::EQ);
-        $scalar = $this->static_scalar();
-      }
-    }
-    else {
-      if($this->token_type() == TokenType::_STATIC) {
-        $this->match(TokenType::_STATIC);
-        $this->match(TokenType::ID);
-
-        if($this->token_type() == TokenType::EQ) {
-          $this->match(TokenType::EQ);
-          $scalar = $this->static_scalar();
-        }
-      }
-      else if($this->token_type() == TokenType::ID) {
-        $this->match(TokenType::ID);
-        $this->match(TokenType::EQ);
-
-        $scalar = $this->static_scalar();
-      }
-      else {
-        $this->error();
-      }
-    }
-  }
-
-
-  /*
   *   class_prop = access_modifier [ 'static' ] IDENTIFIER [ '=' static_scalar ]
   *              | [ access_modifier ] 'static' IDENTIFIER [ '=' static_scalar ]
   *              | [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
   */
   private function class_prop() {
     /* TreeNode */ $prop = null;
-    /* TreeNode */ $modifier = null;
-    /* TreeNode */ $static = null;
-    /* TreeNode */ $id = null;
-    /* TreeNode */ $val = null;
+    /* AttrNode */ $modifier = null;
+    /* AttrNode */ $static = null;
+    /* StmtNode */ $id = null;
+    /* StmtNode */ $scalar = null;
+    $backtrack = 0;
 
     if($this->token_type() == TokenType::MODIFIER) {
       $modifier = new AttrNode(AttrKind::modifierK);
       $modifier->value($this->token_value());
       $this->match(TokenType::MODIFIER);
+      ++$backtrack;
     }
 
     if($this->token_type() == TokenType::_STATIC) {
       $static = new AttrNode(AttrKind::staticK);
+      $static->value($this->token_value());
       $this->match(TokenType::_STATIC);
+      ++$backtrack;
     }
 
-    // IDENTIFIER
+    // If our next token isn't an identifier, we're not doing the right production
+    if($this->token_type() != TokenType::ID) {
+      $this->backtrack($backtrack);
+      return null;
+    }
+
     $id = new ExprNode(ExpKind::idK);
     $id->value($this->token_value());
     $this->match(TokenType::ID);
-
-    /* TreeNode */ $assign = null;
+    ++$backtrack;
 
     if($this->token_type() == TokenType::EQ) {
-      $assign = new StmtNode(StmtKind::assignK);
-      $assign->add_child($id);
-
       $this->match(TokenType::EQ);
-      $val = $this->static_scalar();
+      ++$backtrack;
 
-      if($val != null) {
-        $assign->add_child($val);
+      $scalar = $this->static_scalar();
+
+      if($scalar != null) {
+        $assign = new StmtNode(StmtKind::assignK);
+        $assign->add_child($id);
+        $assign->add_child($scalar);
+
+        $prop = new StmtNode(StmtKind::classpropK);
+
+        if($modifier != null) $prop->add_child($modifier);
+        if($static != null) $prop->add_child($static);
+
+        $prop->add_child($assign);
+      }
+      else {
+        $this->backtrack($backtrack);
       }
     }
-    else {
-      if($modifier == null && $static == null) {
+    else if($this->token_type() == TokenType::NL) {
+      if($modifier != null || $static != null) {
+        $prop = new StmtNode(StmtKind::classpropK);
+
+        if($modifier != null) $prop->add_child($modifier);
+        if($static != null) $prop->add_child($static);
+
+        $prop->add_child($id);
+        
+        // Match the newline here?
+        $this->match(TokenType::NL);
+      }
+      else {
+        // Invalid class property (not enough info)
         $this->error();
       }
     }
-
-    $prop = new StmtNode(StmtKind::classpropK);
-
-    if($modifier != null) {
-      $prop->add_child($modifier);
-    }
-
-    $prop->add_child($id);
 
     return $prop;
   }
@@ -762,6 +743,22 @@ class Parser {
     /* TreeNode */ $c = null;
 
     return $c;
+  }
+
+  /*
+  *   static_scalar = simple_type | array_decl | static_class_reference
+  */
+  private function static_scalar() {
+    /* TreeNode */ $scalar = null;
+
+    if(($scalar = $this->simple_type()) != null) {
+    }
+    else if(($scalar = $this->array_decl()) != null) {
+    }
+    else if(($scalar = $this->static_class_reference()) != null) {
+    }
+
+    return $scalar;
   }
   /***************
   * End Statements
@@ -1002,6 +999,10 @@ class Parser {
 
   private function is_type($type) {
     return $this->token_type() == $type;
+  }
+
+  private function backtrack($howMuch) {
+    $this->idx -= $howMuch;
   }
 
 }
