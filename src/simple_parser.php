@@ -331,7 +331,9 @@ class Parser {
     // paren ('(')
     if($this->token_type() == TokenType::ID &&
        $this->look_ahead(1)->type == TokenType::EQ &&
-       $this->look_ahead(2)->type == TokenType::LP) {
+       $this->look_ahead(2)->type == TokenType::LP &&
+       ($this->look_ahead(3)->type == TokenType::ID ||
+       $this->look_ahead(3)->type == TokenType::RP)) {
 
       $t = new StmtNode(StmtKind::funcdefK);
       $t->value($this->token_value());
@@ -627,6 +629,11 @@ class Parser {
       $c->add_child($implements);
     }
 
+    // Are we at the end of the token stream after declaring the class?
+    if($this->token_type() == TokenType::EOF) {
+      return $c;
+    }
+
     // Have to account for an arbitrary number of newlines
     $this->match(TokenType::NL);
     $this->match(TokenType::INDENT);
@@ -636,13 +643,20 @@ class Parser {
 
     while($this->token_type() != TokenType::EOF && $this->token_type() != TokenType::DEDENT) {
 
+      if($this->token_type() == TokenType::NL) {
+        $this->match(TokenType::NL);
+        continue;
+      }
+
       if(($p = $this->class_method()) != null) {
+        $this->pln('Class Method');
+        $c->add_child($p);
       }
       else if(($p = $this->class_prop()) != null) {
-        //print_r($p);
         $c->add_child($p);
       }
       else if(($p = $this->class_const()) != null) {
+        $c->add_child($p);
       }
       else {
         $this->error();
@@ -657,6 +671,37 @@ class Parser {
   */
   private function class_method() {
     /* TreeNode */ $m = null;
+    /* TreeNode */ $modifier = null;
+    /* TreeNode */ $access = null;
+    $backtrack = 0;
+
+    if($this->token_type() == TokenType::MODIFIER) {
+      // access_modifier
+      $modifier = new AttrNode(AttrKind::modifierK);
+      $modifier->value($this->token_value());
+      $this->match(TokenType::MODIFIER);
+      $backtrack++;
+    }
+
+    while($this->token_type() == TokenType::ACCESS) {
+      // access_level
+      $access = new AttrNode(AttrKind::accessK);
+      $access->value($this->token_value());
+      $this->match(TokenType::ACCESS);
+      $backtrack++;
+    }
+
+    $funcDef = $this->func_def_stmt();
+
+    if($funcDef != null) {
+      $m = new StmtNode(StmtKind::classmethodK);
+      if($modifier != null) $m->add_child($modifier);
+      if($access != null) $m->add_child($access);
+      $m->add_child($funcDef);
+    }
+    else {
+      $this->backtrack($backtrack);
+    }
 
     return $m;
   }
@@ -682,7 +727,7 @@ class Parser {
     }
 
     if($this->token_type() == TokenType::_STATIC) {
-      $static = new AttrNode(AttrKind::staticK);
+      $static = new AttrNode(AttrKind::accesstypeK);
       $static->value($this->token_value());
       $this->match(TokenType::_STATIC);
       ++$backtrack;
@@ -758,7 +803,7 @@ class Parser {
     if($this->token_type() == TokenType::_CONST) {
       // 'const'
       $this->match(TokenType::_CONST);
-      $c = new StmtNode(StmtKind::constK);
+      $c = new StmtNode(StmtKind::classconstK);
 
       // IDENTIFIER
       $id = new StmtNode(StmtKind::idK);
@@ -783,7 +828,7 @@ class Parser {
         $type = $this->simple_type();
       }
 
-      if($this->token-type() == TokenType::NL) {
+      if($this->token_type() == TokenType::NL) {
         $this->match(TokenType::NL);
       }
       else {
@@ -809,6 +854,7 @@ class Parser {
 
     return $scalar;
   }
+
   /***************
   * End Statements
   ***************/
@@ -1036,7 +1082,11 @@ class Parser {
   }
 
   private function error() {
-    throw new Exception('Unexpected token: "'. $this->tokens[$this->idx]->value .'"');
+    $t = debug_backtrace();
+    //print_r($t);
+    $caller = array_shift($t);
+    //echo "\n### Error ###\n{$caller['class']}->{$caller['function']}, line {$caller['line']}\n";
+    throw new Exception('Unexpected token: "'. $this->tokens[$this->idx]->value .'"; parse error line: '. $caller['line']);
   }
 
   private function pln($str) {

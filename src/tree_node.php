@@ -54,6 +54,7 @@ class StmtKind {
   const classK = 'classK';
   const classpropK = 'classpropK';
   const classconstK = 'classconstK';
+  const classmethodK = 'classmethodK';
 }
 
 class ExpKind {
@@ -74,5 +75,6 @@ class AttrKind {
   const modifierK = 'modifierK';
   const extendsK = 'extendsK';
   const implementsK = 'implementsK';
+  const accesstypeK = 'accesstypeK';
 }
 

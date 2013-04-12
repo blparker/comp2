@@ -47,5 +47,6 @@ class TokenType {
   const MODIFIER = 'modifier';
   const _STATIC = 'static';
   const _CONST = 'const';
+  const ACCESS = 'access';
 }
 
