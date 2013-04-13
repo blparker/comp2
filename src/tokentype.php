@@ -13,6 +13,8 @@ class TokenType {
   const DIV = '/';
   const LP  = '(';
   const RP  = ')';
+  const LSB  = '[';
+  const RSB  = ']';
   const NUM = 'number';
   const EOF = 'eof';
   const NL = 'nl';

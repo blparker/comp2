@@ -884,11 +884,107 @@ class Parser {
       $this->match(TokenType::NL);
       $this->match(TokenType::INDENT);
 
+      while($this->token_type() != TokenType::EOF && $this->token_type() != TokenType::DEDENT) {
+        if($this->token_type() == TokenType::NL) {
+          $this->match(TokenType::NL);
+          continue;
+        }
+
+        if(($p = $this->interface_method()) != null) {
+          $this->pln('Interface Method');
+          $i->add_child($p);
+        }
+        else if(($p = $this->class_const()) != null) {
+          $this->pln('Interface const');
+          $i->add_child($p);
+        }
+        else {
+          $this->error();
+        }
+      }
 
       $this->match(TokenType::DEDENT);
     }
 
     return $i;
+  }
+
+  /*
+  *   interface_method = [ 'public' ] IDENTIFIER '=' '(' [ id_list ] ')'
+  */
+  private function interface_method() {
+    /* TreeNode */ $m = null;
+    /* AttrNode */ $modifier = null;
+    $backtrack = 0;
+
+    // 'public'
+    if($this->token_type() == TokenType::MODIFIER) {
+      $modifier = new AttrNode(AttrKind::modifierK);
+      $modifier->value($this->token_value());
+      $this->match(TokenType::MODIFIER);
+      ++$backtrack;
+    }
+
+    if($this->token_type() != TokenType::ID) {
+      $this->backtrack($backtrack);
+      return null;
+    }
+
+    $m = new StmtNode(StmtKind::funcdefK);
+    $m->value($this->token_value());
+
+    if($modifier != null) $m->add_child($modifier);
+
+    // IDENTIFIER
+    $this->match(TokenType::ID);
+    // '='
+    $this->match(TokenType::EQ);
+
+    if($this->token_type() == TokenType::LP) {
+      $args = $this->func_args_list();
+
+      if($args != null) {
+        $m->add_child($args);
+      }
+    }
+
+    $this->match(TokenType::NL);
+
+    return $m;
+  }
+
+  /*
+  *   IDENTIFIER { ',' IDENTIFIER }
+  */
+  private function id_list() {
+    /* TreeNode */ $ids = null;
+
+    if($this->token_type() == TokenType::ID) {
+      $t = new ExprNode(ExpKind::idlistK);
+
+      // IDENTIFIER
+      while($this->token_type() == TokenType::ID) {
+        $i = new ExprNode(ExpKind::idK);
+        $i->value($this->token_value());
+
+        // IDENTIFIER
+        $this->match(TokenType::ID);
+
+        $t->add_child($i);
+
+        // COMMA
+        if($this->token_type() == TokenType::COMMA) {
+          $this->match(TokenType::COMMA);
+          continue;
+        }
+        else if($this->token_type() != TokenType::RP) {
+          // If we don't have a comma, and the next token isn't the closing right paren, throw an error
+          $this->error();
+        }
+      }
+    }
+
+    return $ids;
   }
 
   /***************
@@ -1063,6 +1159,33 @@ class Parser {
     }
 
     return $exprs;
+  }
+
+  /*
+  *
+  */
+  private function array_decl() {
+    /* TreeNode */ $a = null;
+
+    if($this->token_type() == TokenType::LSB) {
+      $a = new ExprNode(ExpKind::arrayK);
+      $this->match(TokenType::LSB);
+
+      while($this->token_type() != TokenType::EOF && $this->token_type() != TokenType::RSB) {
+        $scalar = $this->static_scalar();
+        if($scalar == null) break;
+
+        $a->add_child($scalar);
+
+        if($this->token_type() == TokenType::COMMA) {
+          $this->match(TokenType::COMMA);
+        }
+      }
+
+      $this->match(TokenType::RSB);
+    }
+
+    return $a;
   }
 
 

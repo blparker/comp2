@@ -69,6 +69,7 @@ class ExpKind {
   const addopK = 'addopK';
   const multopK = 'multopK';
   const idlistK = 'idlistK';
+  const arrayK = 'arrayK';
 }
 
 class AttrKind {
