@@ -10,6 +10,7 @@ statement   = if_stmt
             | do_while_stmt
             | func_def_stmt
             | class_def_stmt
+            | interface_def_stmt
             | switch_stmt
             | assign_stmt
             | function_call
@@ -42,6 +43,11 @@ class_prop = access_modifier [ 'static' ] IDENTIFIER [ '=' static_scalar ]
            | [ access_modifier ] [ 'static' ] IDENTIFIER '=' static_scalar
 static_scalar  = simple_type | array_decl | static_class_reference
 class_const    = 'const' IDENTIFIER '=' simple_type { ',' IDENTIFIER '=' simple_type }
+
+interface_def_stmt = 'interface' IDENTIFIER [ 'extends' id_list ] NEWLINE interface_body
+interface_body     = INDENT { interface_stmt } DEDENT
+interface_stmt     = interface_method | class_const
+interface_method   = [ 'public' ] IDENTIFIER '=' '(' [ id_list ] ')'
 
 switch_stmt    = 'switch' expr NEWLINE INDENT { switch_case } [ 'default' NEWLINE inner_block ] NEWLINE DEDENT
 switch_case    = 'case' expr_list NEWLINE inner_block NEWLINE

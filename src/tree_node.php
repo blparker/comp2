@@ -55,6 +55,7 @@ class StmtKind {
   const classpropK = 'classpropK';
   const classconstK = 'classconstK';
   const classmethodK = 'classmethodK';
+  const interfaceK = 'interfaceK';
 }
 
 class ExpKind {

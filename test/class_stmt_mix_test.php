@@ -56,31 +56,4 @@ $t = $method->invoke($parser);
 $tp->print_tree($t);
 
 
-/*
-*   class Foo
-*     public baz = (1 + 2)
-*/
-$tokens = array(
-  new Token(TokenType::_CLASS,   'class'),
-  new Token(TokenType::ID,       'Foo'),
-  new Token(TokenType::NL,       'nl'),
-  new Token(TokenType::INDENT,   'indent'),
-  new Token(TokenType::MODIFIER, 'public'),
-  new Token(TokenType::ID,       'baz'),
-  new Token(TokenType::EQ,       '='),
-  new Token(TokenType::LP,       '('),
-  new Token(TokenType::NUM,      '1'),
-  new Token(TokenType::ADDOP,    '+'),
-  new Token(TokenType::NUM,      '2'),
-  new Token(TokenType::RP,       ')'),
-  new Token(TokenType::STR,      'Hello'),
-  new Token(TokenType::NL,       'nl'),
-  new Token(TokenType::DEDENT,   'dedent'),
-  new Token(TokenType::EOF,      'eof')
-);
-
-$parser = new Parser($tokens);
-$t = $method->invoke($parser);
-$tp->print_tree($t);
-
 

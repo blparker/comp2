@@ -855,6 +855,42 @@ class Parser {
     return $scalar;
   }
 
+  /*
+  *   interface_def_stmt = 'interface' IDENTIFIER [ 'extends' id_list ] NEWLINE interface_body
+  */
+  private function interface_def_stmt() {
+    /* TreeNode */ $i = null;
+
+    if($this->token_type() == TokenType::_INTERFACE) {
+      // 'interface'
+      $this->match(TokenType::_INTERFACE);
+
+      $i = new StmtNode(StmtKind::interfaceK);
+
+      $id = new StmtNode(StmtKind::idK);
+      $id->value($this->token_value());
+      $this->match(TokenType::ID);
+      $i->add_child($id);
+
+      if($this->token_type() == TokenType::_EXTENDS) {
+        $this->match(TokenType::_EXTENDS);
+
+        $ids = $this->id_list();
+        if($ids == null) $this->error();
+
+        $i->add_child($ids);
+      }
+
+      $this->match(TokenType::NL);
+      $this->match(TokenType::INDENT);
+
+
+      $this->match(TokenType::DEDENT);
+    }
+
+    return $i;
+  }
+
   /***************
   * End Statements
   ***************/

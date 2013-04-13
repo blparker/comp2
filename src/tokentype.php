@@ -48,5 +48,6 @@ class TokenType {
   const _STATIC = 'static';
   const _CONST = 'const';
   const ACCESS = 'access';
+  const _INTERFACE = 'interface';
 }
 
