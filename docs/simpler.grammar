@@ -66,7 +66,9 @@ expr_rest   = null
             | compound_stmt
             | simple_type
 
-simple_type = true | false | NUMBER | STRING | IDENTIFIER
+simple_type = true | false | NUMBER | STRING | id_with_accessor | IDENTIFIER
+id_with_accessor = IDENTIFIER { '.' IDENTIFIER }
+
 array_decl  = '[' [ array_element_list ] ']'
 array_element_list = array_pair { ',' array_pair }
 array_pair  = static_scalar [ ':' static_scalar ]
