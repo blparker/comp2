@@ -17,9 +17,14 @@ statement   = if_stmt
             | arith_stmt
 
 assign_stmt = 'var' IDENTIFIER [ '=' expr ]
-            | assignable '=' expr
+            | IDENTIFIER '=' expr
 
-assignable    = IDENTIFIER { selector }
+// assignable    = IDENTIFIER { selector }
+compound_id   = variable_type { '[' [ expr ] ']' } [ '.' compound_id ]
+
+variable_type = IDENTIFIER | function_call
+selector      = { '
+
 if_stmt       = 'if' expr NEWLINE inner_block { 'else if' expr NEWLINE inner_block } [ 'else' NEWLINE inner_block ]
 for_stmt      = expanded_for | condensed_for
 expanded_for  = 'for' IDENTIFIER '=' expr ',' expr, [ ',' expr ] NEWLINE inner_block

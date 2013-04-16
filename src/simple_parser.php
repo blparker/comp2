@@ -991,6 +991,58 @@ class Parser {
   * End Statements
   ***************/
 
+  private function compound_id() {
+    /* TreeNode */ $t = null;
+
+    if(($t = $this->function_call()) != null) {
+    }
+    else if($this->token_type() == TokenType::ID) {
+
+      $id = new StmtNode(StmtKind::idK);
+      $id->value($this->token_value());
+      $this->match(TokenType::ID);
+
+      if($this->token_type() == TokenType::LSB || $this->token_type() == TokenType::DOT) {
+        $t = new StmtNode(StmtKind::compoundidK);
+      }
+
+      if($this->token_type() == TokenType::LSB) {
+        $selectors = null;
+        while($this->token_type() == TokenType::LSB && $this->token_type() != TokenType::EOF) {
+          if($selectors == null) {
+            $selectors = new AttrNode(AttrKind::selectorK);
+          }
+
+          $this->match(TokenType::LSB);
+          $expr = $this->expr();
+
+          if($expr != null) {
+            $selectors->add_child($expr);
+          }
+
+          $this->match(TokenType::RSB);
+        }
+
+        if($selectors != null) {
+          $t->add_child($selectors);
+        }
+      }
+
+      if($this->token_type() == TokenType::DOT) {
+        $this->match(TokenType::DOT);
+
+        $c = $this->compound_id();
+        $t->add_child($c);
+      }
+
+      if($t == null) {
+        $t = $id;
+      }
+    }
+
+    return $t;
+  }
+
 
   /*
   *   expr = null | function_call | simple_type
