@@ -17,7 +17,7 @@ statement   = if_stmt
             | arith_stmt
 
 assign_stmt = 'var' IDENTIFIER [ '=' expr ]
-            | IDENTIFIER '=' expr
+            | compound_id '=' expr
 
 // assignable    = IDENTIFIER { selector }
 compound_id   = variable_type { '[' [ expr ] ']' } [ '.' compound_id ]

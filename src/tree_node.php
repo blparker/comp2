@@ -42,7 +42,6 @@ class StmtKind {
   const ifK = 'ifK';
   const elifK = 'elifK';
   const elseK = 'elseK';
-  const idK = 'idK';
   const funcK = 'funcK';
   const funcdefK = 'funcdefK';
   const forK = 'forK';
