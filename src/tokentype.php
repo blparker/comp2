@@ -52,5 +52,6 @@ class TokenType {
   const ACCESS = 'access';
   const _INTERFACE = 'interface';
   const DOT = 'dot';
+  const _NEW = 'new';
 }
 

@@ -42,7 +42,11 @@ class Parser {
     /* TreeNode */ $p = $t;
 
     while($this->token_type() != TokenType::EOF && $this->token_type() != TokenType::DEDENT) {
-      $this->match(TokenType::NL);
+      if($this->token_type() == TokenType::NL) {
+        $this->match(TokenType::NL);
+        continue;
+      }
+
       /* TreeNode */ $q = $this->statement();
 
       if($q != null) {
@@ -991,6 +995,9 @@ class Parser {
   * End Statements
   ***************/
 
+  /*
+  *   compound_id = variable_type { '[' [ expr ] ']' } [ '.' compound_id ]
+  */
   private function compound_id() {
     /* TreeNode */ $t = null;
     $id = null;
