@@ -70,7 +70,6 @@ class Parser {
     $this->match(TokenType::INDENT);
     $t = $this->block();
     $this->match(TokenType::DEDENT);
-
     return $t;
   }
 
@@ -440,8 +439,11 @@ class Parser {
       $this->match(TokenType::NL);
       $this->match(TokenType::INDENT);
 
-      while($this->token_type() == TokenType::_CASE) {
+      while($this->token_type() == TokenType::_CASE && $this->token_type() != TokenType::EOF) {
         $case = $this->switch_case_stmt();
+
+        // NL
+        $this->match(TokenType::NL);
 
         if($case == null) $this->error();
 
@@ -491,9 +493,6 @@ class Parser {
         if($b != null) {
           $c->add_child($b);
         }
-
-        // NL
-        $this->match(TokenType::NL);
     }
 
     return $c;
@@ -1116,6 +1115,7 @@ class Parser {
 
     if($this->token_type() == TokenType::NUL) {
       $e = new ExprNode(ExpKind::nullK);
+      $this->match(TokenType::NUL);
     }
     else if(($e = $this->function_call()) != null) {
     }
@@ -1134,7 +1134,7 @@ class Parser {
   private function expr() {
     /* TreeNode */ $t = null;
     /* TokenType */ $tokenType = $this->token_type();
-    
+
     if(($t = $this->expr_addop()) != null) {
     }
 
@@ -1410,8 +1410,14 @@ class Parser {
     $this->idx -= $howMuch;
   }
 
-  private function tav() {
-    $this->pln("### ". $this->token_type() . " - " . $this->token_value());
+  private function tav($str = null) {
+    if(isset($str)) {
+      $str = $str . " - ";
+    }
+    else {
+      $str = "";
+    }
+    $this->pln("### {$str}". $this->token_type() . " - " . $this->token_value());
   }
 
 }

@@ -42,8 +42,8 @@ $tokens = array(
 );
 
 $parser = new Parser($tokens);
-$t = $method->invoke($parser);
-$tp->print_tree($t);
+//$t = $method->invoke($parser);
+//$tp->print_tree($t);
 
 /*
 *
@@ -86,3 +86,30 @@ $parser = new Parser($tokens);
 $t = $method->invoke($parser);
 $tp->print_tree($t);
 
+
+/*
+*
+*   switch foo
+*     default
+*       bar = null
+*/
+$tokens = array(
+  new Token(TokenType::_SWITCH, 'switch'),
+  new Token(TokenType::ID,      'foo'),
+  new Token(TokenType::NL,      'nl'),
+  new Token(TokenType::INDENT,  'indent'),
+  new Token(TokenType::_DEFAULT,'default'),
+  new Token(TokenType::NL,      'nl'),
+  new Token(TokenType::INDENT,  'indent'),
+  new Token(TokenType::ID,      'bar'),
+  new Token(TokenType::EQ,      '='),
+  new Token(TokenType::NUL,     'null'),
+  new Token(TokenType::NL,      'nl'),
+  new Token(TokenType::DEDENT,  'dedent'),
+  new Token(TokenType::DEDENT,  'dedent'),
+  new Token(TokenType::EOF,     'eof')
+);
+
+$parser = new Parser($tokens);
+$t = $method->invoke($parser);
+$tp->print_tree($t);
