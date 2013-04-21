@@ -1,0 +1,15 @@
+
+variable                 = base_variable_with_function_calls [ "->" object_property method_parameters { "->" object_property method_parameters } ] ;
+method_parameters        = "(" function_call_parameter_list ")" ;
+variable_without_objects = reference_variable | simple_indirect_reference reference_variable ;
+static_member            = fully_qualified_class_name "::" variable_without_objects ;
+
+base_variable_with_function_calls = base_variable | function_call ;
+
+base_variable             = reference_variable | simple_indirect_reference reference_variable | static_member ;
+reference_variable        = compound_variable { selector } ;
+compound_variable         = T_VARIABLE | "$" "{" expr "}" ;
+selector                  = "[" [expr] "]" | "{" expr "}" ;
+object_property           = variable_name { selector } | variable_without_objects ;
+variable_name             = T_STRING | "{" expr "}" ;
+simple_indirect_reference = "$" {"$"} ;

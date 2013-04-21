@@ -70,6 +70,7 @@ class ExpKind {
   const multopK = 'multopK';
   const idlistK = 'idlistK';
   const arrayK = 'arrayK';
+  const instantiateK = 'instantiateK';
 }
 
 class AttrKind {

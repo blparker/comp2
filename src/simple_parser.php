@@ -548,13 +548,44 @@ class Parser {
         $args = $this->expr_list();
         if($args == null) {
           // Need to backtrack
-          --$this->idx;
+          $this->backtrack(1);
           return null;
         }
         else {
           $t->add_child($args);
         }
       }
+    }
+
+    return $t;
+  }
+
+  /*
+  *   instantiation = 'new' IDENTIFIER '(' [ expr_list ] ')'
+  */
+  private function instantiation() {
+    /* TreeNode */ $t = null;
+
+    if($this->token_type() == TokenType::_NEW && $this->look_ahead(1)->type == TokenType::ID) {
+      $t = new ExprNode(ExpKind::instantiateK);
+      // 'new'
+      $this->match(TokenType::_NEW);
+
+      // IDENTIFIER
+      $id = new ExprNode(ExpKind::idK);
+      $id->value($this->token_value());
+      $this->match(TokenType::ID);
+
+      $t->add_child($id);
+
+      // '('
+      $this->match(TokenType::LP);
+
+      $expr_list = $this->expr_list();
+      if($expr_list != null) $t->add_child($expr_list);
+
+      // ')'
+      $this->match(TokenType::RP);
     }
 
     return $t;
@@ -1054,6 +1085,48 @@ class Parser {
     return $t;
   }
 
+  //private function expr() {
+    ///* TreeNode */ $e = null;
+//
+    //$expr_rest = $this->expr_rest();
+    //if($expr_rest != null) {
+      //$e = $expr_rest;
+//
+      //if($this->token_type() == TokenType::RELOP) {
+        //$relop = new ExprNode(ExpKind::relopK);
+        //$relop->value($this->token_value());
+//
+        //$this->match(TokenType::RELOP);     
+//
+        //$expr = $this->expr();
+        //if($expr == null) $this->error();
+//
+        //$temp = $e;
+        //$e = $relop;
+        //$e->add_child($temp);
+        ////$e->add_child($expr);
+      //}
+    //}
+
+    //return $e;
+  //}
+
+  private function expr_rest() {
+    /* TreeNode */ $e = null;
+
+    if($this->token_type() == TokenType::NUL) {
+      $e = new ExprNode(ExpKind::nullK);
+    }
+    else if(($e = $this->function_call()) != null) {
+    }
+    else if(($e = $this->instantiation()) != null) {
+    }
+    else if(($e = $this->simple_type()) != null) {
+    }
+
+    return $e;
+  }
+
 
   /*
   *   expr = null | function_call | simple_type
@@ -1065,7 +1138,7 @@ class Parser {
     if(($t = $this->expr_addop()) != null) {
     }
 
-    if($this->token_type() == TokenType::RELOP) {
+    if($t != null && $this->token_type() == TokenType::RELOP) {
       $r = new ExprNode(ExpKind::relopK);
       $r->value($this->token_value());
 
@@ -1089,7 +1162,7 @@ class Parser {
 
     if(($t = $this->expr_term()) != null) {
 
-      while($this->token_type() == TokenType::ADDOP) {
+      while($this->token_type() == TokenType::ADDOP && $this->token_type != TokenType::EOF) {
         if($this->token_type() == TokenType::ADDOP) {
           $r = new ExprNode(ExpKind::addopK);
           $r->value($this->token_value());
@@ -1115,7 +1188,7 @@ class Parser {
     /* TreeNode */ $t = null;
 
     if(($t = $this->expr_factor()) != null) {
-      while($this->token_type() == TokenType::MULTOP) {
+      while($this->token_type() == TokenType::MULTOP && $this->token_type != TokenType::EOF) {
         if($this->token_type() == TokenType::MULTOP) {
           $r = new ExprNode(ExpKind::multopK);
           $r->value($this->token_value());
@@ -1139,9 +1212,8 @@ class Parser {
 
   private function expr_factor() {
     /* TreeNode */ $t = null;
-    /* TokenType */ $tokenType = $this->token_type();
 
-    if($tokenType == TokenType::NUL) {
+    /*if($tokenType == TokenType::NUL) {
       $t = new ExprNode(ExpKind::nullK);
 
       $this->match(TokenType::NUL);
@@ -1149,6 +1221,18 @@ class Parser {
     else if(($t = $this->function_call()) != null) {
     }
     else if(($t = $this->simple_type()) != null) {
+    }*/
+
+    if($this->token_type() == TokenType::LP) {
+      // '('
+      $this->match(TokenType::LP);
+
+      $t = $this->expr();
+
+      // ')'
+      $this->match(TokenType::RP);
+    }
+    else if(($t = $this->expr_rest()) != null) {
     }
 
     return $t;
@@ -1324,6 +1408,10 @@ class Parser {
 
   private function backtrack($howMuch) {
     $this->idx -= $howMuch;
+  }
+
+  private function tav() {
+    $this->pln("### ". $this->token_type() . " - " . $this->token_value());
   }
 
 }

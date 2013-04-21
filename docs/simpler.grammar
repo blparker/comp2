@@ -65,9 +65,10 @@ term          = factor { mulop factor }
 mulop         = '*' | '/'
 factor        = '(' compound_stmt ')' | simple_type | function_call
 
-expr        = expr_rest [ relop expr ] | expr_rest
+expr        = expr_rest [ relop expr_rest ]
 expr_rest   = null
             | function_call
+            | instantiation
             | compound_stmt
             | simple_type
 
@@ -83,6 +84,7 @@ function_call = IDENTIFIER '(' [ expr_list ] ')'
 
 expr_list       = { expr ',' } expr
 identifier_list = IDENTIFIER { ',' IDENTIFIER }
+instantiation   = 'new' IDENTIFIER '(' [ expr_list ] ')'
 
 
 
