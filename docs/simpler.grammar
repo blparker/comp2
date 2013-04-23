@@ -17,10 +17,11 @@ statement   = if_stmt
             | arith_stmt
 
 assign_stmt = 'var' IDENTIFIER [ '=' expr ]
-            | compound_id '=' expr
+            | assignable '=' expr
 
-// assignable    = IDENTIFIER { selector }
-compound_id   = variable_type { '[' [ expr ] ']' } [ '.' compound_id ]
+assignable    = variable_type assignable_rest [ selector ]
+assignable_rest = { '[' [ expr ] ']' } [ '.' assignable ]
+variable      = variable_type { '[' [ expr ] ']' } [ '.' variable ]
 
 variable_type = IDENTIFIER | function_call
 

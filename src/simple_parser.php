@@ -505,7 +505,30 @@ class Parser {
     /* TreeNode */ $t = null;
     $tokenType = $this->token_type();
 
-    if($tokenType == TokenType::ID &&
+    $this->count_matches("begin");
+
+    if(($a = $this->assignable()) != null) {
+      if($this->token_type() == TokenType::EQ) {
+        $t = new StmtNode(StmtKind::assignK);
+        //$t->value($this->token_value());
+        $t->add_child($a);
+
+        //$this->match(TokenType::ID);
+        $this->match(TokenType::EQ);
+
+        $expr = $this->expr();
+        $t->add_child($expr);
+      }
+      else {
+        $this->rollback_matches();
+      }
+    }
+    else {
+      $this->rollback_matches();
+    }
+    $this->count_matches("end");
+
+    /*if($tokenType == TokenType::ID &&
        $this->look_ahead(1)->type == TokenType::EQ) {
 
       $t = new StmtNode(StmtKind::assignK);
@@ -516,9 +539,20 @@ class Parser {
 
       $expr = $this->expr();
       $t->add_child($expr);
-    }
+    }*/
 
     return $t;
+  }
+
+  private $countMatches = false;
+  private $matchIdx = 0;
+  private function count_matches($state) {
+    $this->countMatches = ($state == "begin") ? true : false;
+    $this->matchIdx = 0;
+  }
+
+  private function rollback_matches() {
+    $this->idx -= $this->matchIdx;
   }
 
   /*
@@ -1026,6 +1060,124 @@ class Parser {
   ***************/
 
   /*
+  *
+  */
+  private function assignable() {
+    /* TreeNode */ $a = null;
+    /* TreeNode */ $id = null;
+
+    if(($id = $this->function_call()) != null) {
+    }
+    else if($this->token_type() == TokenType::ID) {
+      $id = new ExprNode(ExpKind::idK);
+      $id->value($this->token_value());
+      $this->match(TokenType::ID);
+    }
+    else {
+      return null;
+    }
+
+    if($this->token_type() == TokenType::LSB || $this->token_type() == TokenType::DOT) {
+      $a = new StmtNode(StmtKind::compoundidK);
+      $a->add_child($id);
+    }
+
+    if($this->token_type() == TokenType::LSB) {
+      $selectors = null;
+      while($this->token_type() == TokenType::LSB && $this->token_type() != TokenType::EOF) {
+        if($selectors == null) {
+          $selectors = new AttrNode(AttrKind::selectorK);
+        }
+
+        $this->match(TokenType::LSB);
+        $expr = $this->expr();
+
+        if($expr != null) {
+          $selectors->add_child($expr);
+        }
+
+        $this->match(TokenType::RSB);
+      }
+
+      if($selectors != null) {
+        $a->add_child($selectors);
+      }
+    }
+
+    if($this->token_type() == TokenType::DOT) {
+      $this->match(TokenType::DOT);
+
+      $c = $this->assignable();
+      $a->add_child($c);
+    }
+
+    if($a == null) {
+      $a = $id;
+    }
+
+    return $a;
+  }
+
+  /*
+  *
+  */
+  private function variable() {
+    /* TreeNode */ $v = null;
+    /* TreeNode */ $id = null;
+
+    if(($id = $this->function_call()) != null) {
+    }
+    else if($this->token_type() == TokenType::ID) {
+      $id = new ExprNode(ExpKind::idK);
+      $id->value($this->token_value());
+      $this->match(TokenType::ID);
+    }
+    else {
+      return null;
+    }
+
+    if($this->token_type() == TokenType::LSB || $this->token_type() == TokenType::DOT) {
+      $v = new StmtNode(StmtKind::compoundidK);
+      $v->add_child($id);
+    }
+
+    if($this->token_type() == TokenType::LSB) {
+      $selectors = null;
+      while($this->token_type() == TokenType::LSB && $this->token_type() != TokenType::EOF) {
+        if($selectors == null) {
+          $selectors = new AttrNode(AttrKind::selectorK);
+        }
+
+        $this->match(TokenType::LSB);
+        $expr = $this->expr();
+
+        if($expr != null) {
+          $selectors->add_child($expr);
+        }
+
+        $this->match(TokenType::RSB);
+      }
+
+      if($selectors != null) {
+        $v->add_child($selectors);
+      }
+    }
+
+    if($this->token_type() == TokenType::DOT) {
+      $this->match(TokenType::DOT);
+
+      $c = $this->assignable();
+      $v->add_child($c);
+    }
+
+    if($v == null) {
+      $v = $id;
+    }
+
+    return $v;
+  }
+
+  /*
   *   compound_id = variable_type { '[' [ expr ] ']' } [ '.' compound_id ]
   */
   private function compound_id() {
@@ -1210,18 +1362,11 @@ class Parser {
     return $t;
   }
 
+  /*
+  *   factor = '(' compound_stmt ')' | simple_type | function_call
+  */
   private function expr_factor() {
     /* TreeNode */ $t = null;
-
-    /*if($tokenType == TokenType::NUL) {
-      $t = new ExprNode(ExpKind::nullK);
-
-      $this->match(TokenType::NUL);
-    }
-    else if(($t = $this->function_call()) != null) {
-    }
-    else if(($t = $this->simple_type()) != null) {
-    }*/
 
     if($this->token_type() == TokenType::LP) {
       // '('
@@ -1267,9 +1412,14 @@ class Parser {
         $this->match(TokenType::STR);
         break;
       case TokenType::ID:
-        $t = new ExprNode(ExpKind::idK);
-        $t->value($this->token_value());
-        $this->match(TokenType::ID);
+        /*if(($t = $this->variable()) != null) {
+        }
+        else {
+          $t = new ExprNode(ExpKind::idK);
+          $t->value($this->token_value());
+          $this->match(TokenType::ID);
+        }*/
+        $t = $this->variable();
         break;
     }
 
@@ -1343,6 +1493,11 @@ class Parser {
     if(is_array($tokenType)) {
       if($this->token_type() == $tokenType[0] ||
          $this->token_type() == $tokenType[1]) {
+
+        if($this->countMatches) {
+          ++$this->matchIdx;
+        }
+
         ++$this->idx;
       }
       else {
@@ -1351,6 +1506,9 @@ class Parser {
     }
     else {
       if($this->token_type() == $tokenType) {
+        if($this->countMatches) {
+          ++$this->matchIdx;
+        }
         ++$this->idx;
       }
       else {
