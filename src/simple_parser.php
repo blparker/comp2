@@ -81,6 +81,7 @@ class Parser {
 
     //$tokenType = $this->token_type();
 
+    $this->tav();
     //if($tokenType == TokenType::_IF) {
     if(($t = $this->if_stmt()) != null) {
       $this->pln("IF STMT");

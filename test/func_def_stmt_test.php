@@ -36,8 +36,8 @@ $tokens = array(
 );
 
 $parser = new Parser($tokens);
-$t = $method->invoke($parser);
-$tp->print_tree($t);
+//$t = $method->invoke($parser);
+//$tp->print_tree($t);
 
 
 /*
@@ -62,8 +62,8 @@ $tokens = array(
 );
 
 $parser = new Parser($tokens);
-$t = $method->invoke($parser);
-$tp->print_tree($t);
+//$t = $method->invoke($parser);
+//$tp->print_tree($t);
 
 
 /*
@@ -90,8 +90,8 @@ $tokens = array(
 );
 
 $parser = new Parser($tokens);
-$t = $method->invoke($parser);
-$tp->print_tree($t);
+//$t = $method->invoke($parser);
+//$tp->print_tree($t);
 
 
 /*
@@ -123,8 +123,8 @@ $tokens = array(
 );
 
 $parser = new Parser($tokens);
-$t = $method->invoke($parser);
-$tp->print_tree($t);
+//$t = $method->invoke($parser);
+//$tp->print_tree($t);
 
 
 /*
