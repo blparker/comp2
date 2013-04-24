@@ -81,7 +81,6 @@ class Parser {
 
     //$tokenType = $this->token_type();
 
-    $this->tav();
     //if($tokenType == TokenType::_IF) {
     if(($t = $this->if_stmt()) != null) {
       $this->pln("IF STMT");
@@ -521,7 +520,10 @@ class Parser {
         $t->add_child($expr);
       }
       else {
+        $this->pln("#### ROLLING Back: ". $this->matchIdx);
+        $this->tav();
         $this->rollback_matches();
+        $this->tav();
       }
     }
     else {
@@ -1567,6 +1569,9 @@ class Parser {
 
   private function backtrack($howMuch) {
     $this->idx -= $howMuch;
+    if($this->countMatches) {
+      --$this->matchIdx;
+    }
   }
 
   private function tav($str = null) {

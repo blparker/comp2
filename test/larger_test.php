@@ -4,6 +4,12 @@ require_once('../src/simple_parser.php');
 require_once('../util/tree_printer.php');
 require_once('assert.php');
 
+/*
+*   class Foo
+*     public bar
+*   
+*   f = new Foo()
+*/
 $tokens = array(
   new Token(TokenType::_CLASS,   'class'),
   new Token(TokenType::ID,       'Foo'),
