@@ -58,6 +58,9 @@ class Parser {
           $p = $q;
         }
       }
+      else {
+        break;
+      }
     }
 
     return $t;
@@ -74,14 +77,12 @@ class Parser {
   }
 
   /*
-  *   statement = if_stmt | for_stmt | while_stmt | do_while_stmt | assign_stmt | function_call | arith_stmt
+  *   statement = if_stmt | for_stmt | while_stmt | do_while_stmt | func_def_stmt | class_def_stmt
+                | interface_def_stmt | switch_stmt | assign_stmt |  function_call | arith_stmt
   */
   private function statement() {
     /* TreeNode */ $t = null;
 
-    //$tokenType = $this->token_type();
-
-    //if($tokenType == TokenType::_IF) {
     if(($t = $this->if_stmt()) != null) {
       $this->pln("IF STMT");
     }
@@ -92,7 +93,19 @@ class Parser {
       $this->pln("While Stmt");
     }
     else if(($t = $this->do_while_stmt()) != null) {
-      $this->pln('Do while stmt');
+      $this->pln('Do While stmt');
+    }
+    else if(($t = $this->func_def_stmt()) != null) {
+      $this->pln('Function Def Stmt');
+    }
+    else if(($t = $this->class_def_stmt()) != null) {
+      $this->pln('Class Def Stmt');
+    }
+    else if(($t = $this->interface_def_stmt()) != null) {
+      $this->pln('Interface Def Stmt');
+    }
+    else if(($t = $this->switch_stmt()) != null) {
+      $this->pln('Switch Stmt');
     }
     else if(($t = $this->assign_stmt()) != null) {
       $this->pln("Assign Stmt");
@@ -639,6 +652,10 @@ class Parser {
     /* TreeNode */ $c = null;
     /* TreeNode */ $entry = null;
 
+    if($this->token_type() != TokenType::_CLASS && $this->look_ahead(1)->type != TokenType::_CLASS) {
+      return null;
+    }
+
     // class_entry ('abstract' | 'final')
     if($this->token_type() == TokenType::_ABSTRACT ||
        $this->token_type() == TokenType::_FINAL) {
@@ -732,8 +749,12 @@ class Parser {
       else {
         $this->error();
       }
-
     }
+
+    if($this->token_type() != TokenType::EOF && $this->token_type() == TokenType::DEDENT) {
+      $this->match(TokenType::DEDENT);
+    }
+
     return $c;
   }
 
@@ -1265,7 +1286,7 @@ class Parser {
     //return $e;
   //}
 
-  private function expr_rest() {
+  protected function expr_rest() {
     /* TreeNode */ $e = null;
 
     if($this->token_type() == TokenType::NUL) {
@@ -1492,7 +1513,7 @@ class Parser {
   /****************
   * Utility Methods
   ****************/
-  private function match(/* TokenType */ $tokenType) {
+  protected function match(/* TokenType */ $tokenType) {
     if(is_array($tokenType)) {
       if($this->token_type() == $tokenType[0] ||
          $this->token_type() == $tokenType[1]) {
@@ -1526,13 +1547,13 @@ class Parser {
     );
   }
 
-  private function token_type() {
+  protected function token_type() {
     if($this->idx < count($this->tokens)) {
       return $this->tokens[$this->idx]->type;
     }
   }
 
-  private function token_value() {
+  protected function token_value() {
     return $this->tokens[$this->idx]->value;
   }
 
@@ -1548,7 +1569,7 @@ class Parser {
     return null;
   }
 
-  private function error() {
+  protected function error() {
     $t = debug_backtrace();
     //print_r($t);
     $caller = array_shift($t);
@@ -1574,14 +1595,17 @@ class Parser {
     }
   }
 
-  private function tav($str = null) {
+  protected function tav($str = null) {
     if(isset($str)) {
       $str = $str . " - ";
     }
     else {
       $str = "";
     }
-    $this->pln("### {$str}". $this->token_type() . " - " . $this->token_value());
+    $message = "### {$str}". $this->token_type() . " - " . $this->token_value();
+    $t = debug_backtrace();
+    $caller = $t[0];
+    echo "{$caller['class']}->{$caller['function']}, line {$caller['line']} - {$message}\n";
   }
 
 }

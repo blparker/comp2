@@ -59,6 +59,7 @@ class StmtKind {
 }
 
 class ExpKind {
+  const assignK = 'assignK';
   const constK = 'constK';
   const opK  = 'opK';
   const idK = 'idK';
@@ -67,10 +68,16 @@ class ExpKind {
   const arglistK = 'arglistK';
   const relopK = 'relopK';
   const addopK = 'addopK';
+  const bitwiseK = 'bitwiseK';
   const multopK = 'multopK';
   const idlistK = 'idlistK';
   const arrayK = 'arrayK';
   const instantiateK = 'instantiateK';
+  const booleanK = 'booleanK';
+  const notK = 'notK';
+  const castK = 'castK';
+  const unaryK = 'unaryK';
+  const comparisonK = 'comparisonK';
 }
 
 class AttrKind {

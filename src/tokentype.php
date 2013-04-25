@@ -53,5 +53,19 @@ class TokenType {
   const _INTERFACE = 'interface';
   const DOT = 'dot';
   const _NEW = 'new';
+  const _OR = 'or';
+  const _XOR = 'xor';
+  const _AND = 'and';
+  const _ASSIGN = 'assign';
+  const _OR2 = '||';
+  const _AND2 = '&&';
+  const _LOR = '|';
+  const _LAND = '&';
+  const _LXOR = '^';
+  const _COMP = 'comp';
+  const _BITWISE = 'bitwise';
+  const _NOT = '!';
+  const _CAST = 'cast';
+  const _UNARY = 'unary';
 }
 

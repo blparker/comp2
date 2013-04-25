@@ -101,9 +101,9 @@ expr = expr op expr
 compound_stmt = simple_arith [ relop simple_arith ]
 simple_arith  = term { addop term }
 relop         = '<=' | '<' | '>' | '>=' | '==' | '!='
-addop         = '+' | '-'
+addop         = '+' | '-' | '.'
 term          = factor { mulop factor }
-mulop         = '*' | '/'
+mulop         = '*' | '/' | '%'
 factor        = '(' compound_stmt ')' | simple_type | function_call
 
 expr        = expr_addop [ relop expr_addop ]

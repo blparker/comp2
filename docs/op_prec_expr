@@ -1,0 +1,43 @@
+
+compound_stmt = simple_arith [ relop simple_arith ]
+simple_arith  = term { addop term }
+relop         = '<=' | '<' | '>' | '>=' | '==' | '!='
+addop         = '+' | '-' | '.'
+term          = factor { mulop factor }
+mulop         = '*' | '/' | '%'
+factor        = '(' compound_stmt ')' | simple_type | function_call
+
+expr        = expr_addop [ relop expr_addop ]
+expr_addop  = expr_term { addop expr_term }
+expr_term   = expr_factor { mulop expr_factor }
+expr_factor = '(' expr ')' | expr_rest
+
+ex1 = ex2 { 'or' ex2 }
+ex2 = ex3 { 'xor' ex3 }
+ex3 = ex4 { 'and' ex4 }
+ex4 = ex5 [ assignment_op ex5 ]
+ex5 = ex6 { '||' ex6 }
+ex6 = ex7 { '&&' ex7 }
+ex7 = ex8 { '|' ex8 }
+ex8 = ex9 { '^' ex9 }
+ex9 = ex10 { '&' ex10 }
+ex10 = ex11 [ comparison_op ex11 ]
+ex11 = ex12 [ relop ex12 ]
+ex12 = ex13 { bitwise ex13 }
+ex13 = ex14 { addop ex14 }
+ex14 = ex15 { multop ex15 }
+ex15 = [ '!' ] ex16
+ex16 = [ cast ] [ unary ] ex17 | ex17 [ unary ]
+ex17 = '(' expr ')' | expr_rest
+
+unary =  '++' | '--' | '~'
+ex = '(' expr ')' | expr_rest
+
+cast = '(int') | '(float)' | '(string)' | '(array)' | '(object)' | '(bool)'
+assignment_op = '=' | '+=' | '-=' | '*=' | '/=' | '.=' | '%=' 
+              | '&=' | '|=' | '^=' | '<<=' | '>>=' | '=>'
+comparison_op = '==' | '!='
+relop = '<' | '<=' | '>' | '>='
+bitwise = '<<' | '>>'
+addop   = '+' | '-' | '.'
+mulop   = '*' | '/' | '%'
